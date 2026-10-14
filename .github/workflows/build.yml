@@ -1,0 +1,78 @@
+name: Build Jetsam Changer (iOS 17.x - 18.x)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build IPA & TIPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15 / 16
+        run: |
+          echo "Available Xcode installations:"
+          ls -d /Applications/Xcode*
+          if [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          fi
+          xcodebuild -version
+
+      - name: Install ldid
+        run: |
+          brew install ldid
+
+      - name: Build Application
+        run: |
+          chmod +x ./build_ci.sh
+          ./build_ci.sh
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: JetsamChanger-Release
+          path: |
+            build_output/*.ipa
+            build_output/*.tipa
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Jetsam Changer v1.0 (Build ${{ github.run_number }})"
+          body: |
+            ## 🚀 Jetsam Changer (iOS 17.x – 18.x)
+            
+            Ứng dụng chỉnh bộ nhớ Jetsam & Priority cho iOS 17.0 - 18.x tích hợp **Automated Kernel Exploit** và **Dynamic Offset Calibration**.
+
+            ### 📦 Tệp Cài Đặt:
+            - **`JetsamChanger.tipa`**: Dành cho **TrollStore** (iOS 17.0).
+            - **`JetsamChanger.ipa`**: Dành cho **SideStore / AltStore / Sideloadly** (iOS 17.1 – 18.x).
+
+            ### ✨ Tính Năng:
+            - Giao diện đơn giản chia thành 2 tab: **Danh Sách App** và **Cài Đặt & Console**.
+            - Tìm kiếm app nhanh chóng qua tên app hoặc Bundle ID.
+            - Điều chỉnh mức RAM Jetsam tùy ý từ 512 MB lên đến 16 GB hoặc chế độ **Không Giới Hạn (Unlimited ∞)**.
+            - Hỗ trợ các preset cấu hình nhanh: Amethyst / Pojav (6GB), Giả lập Dolphin/UTM (4GB).
+            - Bảng Console & Status kiểm tra chi tiết trạng thái Kernel Exploit và log lỗi.
+          files: |
+            build_output/JetsamChanger.ipa
+            build_output/JetsamChanger.tipa
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
