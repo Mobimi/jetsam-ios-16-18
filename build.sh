@@ -19,6 +19,7 @@ echo "[*] Using iOS SDK: $SDK_PATH"
 # Copy Info.plist and Assets
 echo "[*] Copying resources..."
 cp "JetsamChanger/Resources/Info.plist" "$APP_DIR/Info.plist"
+printf "APPL????" > "$APP_DIR/PkgInfo"
 
 # Compile C / Objective-C sources
 echo "[*] Compiling C/Obj-C kernel sources..."
