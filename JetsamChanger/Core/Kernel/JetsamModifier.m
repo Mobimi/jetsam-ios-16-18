@@ -170,7 +170,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     uint64_t allproc = get_allproc_head();
 
     // If kernel primitive is ready, read directly from kernel proc_t
-    if ([KernelExploit sharedExploit].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
+    if ([KernelExploit shared].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
         uint64_t curr = allproc;
         while (curr != 0) {
             uint32_t curr_pid = kread32(curr + offsets->proc_pid);
@@ -206,7 +206,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
 }
 
 - (BOOL)setJetsamLimit:(int32_t)limitMB forPID:(pid_t)pid {
-    [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[*] Modifying Jetsam limit for PID %d to %d MB...", pid, limitMB]];
+    [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[*] Modifying Jetsam limit for PID %d to %d MB...", pid, limitMB]];
 
     BOOL success = NO;
 
@@ -214,7 +214,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     proc_offsets_t *offsets = get_calibrated_offsets();
     uint64_t allproc = get_allproc_head();
 
-    if ([KernelExploit sharedExploit].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
+    if ([KernelExploit shared].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
         uint64_t curr = allproc;
         while (curr != 0) {
             uint32_t curr_pid = kread32(curr + offsets->proc_pid);
@@ -231,7 +231,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
                 }
                 kwrite32(curr + offsets->proc_memstat_state, state);
 
-                [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[+] Kernel proc_t patched at 0x%llx: limit=%d MB, state=0x%x", curr, limitMB, state]];
+                [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[+] Kernel proc_t patched at 0x%llx: limit=%d MB, state=0x%x", curr, limitMB, state]];
                 success = YES;
                 break;
             }
@@ -243,29 +243,29 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     // Call memorystatus_control syscall
     int ret = j_memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK, pid, (uint32_t)limitMB, NULL, 0);
     if (ret == 0) {
-        [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[+] memorystatus_control syscall succeeded for PID %d.", pid]];
+        [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[+] memorystatus_control syscall succeeded for PID %d.", pid]];
         success = YES;
     } else {
-        [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[*] memorystatus_control returned %d (Kernel direct write: %@)", ret, success ? @"OK" : @"FAILED"]];
+        [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[*] memorystatus_control returned %d (Kernel direct write: %@)", ret, success ? @"OK" : @"FAILED"]];
     }
 
     return success;
 }
 
 - (BOOL)setPriority:(int16_t)priority forPID:(pid_t)pid {
-    [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[*] Adjusting priority for PID %d to %d...", pid, priority]];
+    [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[*] Adjusting priority for PID %d to %d...", pid, priority]];
 
     proc_offsets_t *offsets = get_calibrated_offsets();
     uint64_t allproc = get_allproc_head();
 
-    if ([KernelExploit sharedExploit].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
+    if ([KernelExploit shared].status == EXPLOIT_STATUS_READY && allproc != 0 && offsets->offsets_resolved) {
         uint64_t curr = allproc;
         while (curr != 0) {
             uint32_t curr_pid = kread32(curr + offsets->proc_pid);
             if (curr_pid == (uint32_t)pid) {
                 kwrite16(curr + offsets->proc_memstat_effective_priority, (uint16_t)priority);
                 kwrite16(curr + offsets->proc_memstat_requested_priority, (uint16_t)priority);
-                [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[+] Kernel proc_t priority updated to %d.", priority]];
+                [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[+] Kernel proc_t priority updated to %d.", priority]];
                 return YES;
             }
             curr = kread_ptr(curr + offsets->proc_list_prev);
@@ -286,7 +286,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
 }
 
 - (BOOL)setUnlimitedMemoryForPID:(pid_t)pid {
-    [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[!] Setting UNLIMITED Jetsam budget (-1) for PID %d...", pid]];
+    [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[!] Setting UNLIMITED Jetsam budget (-1) for PID %d...", pid]];
     // Limit of -1 means no limit enforced by Darwin
     BOOL res1 = [self setJetsamLimit:-1 forPID:pid];
     BOOL res2 = [self setPriority:JETSAM_PRIORITY_CRITICAL forPID:pid];
