@@ -143,15 +143,17 @@ struct SettingsView: View {
     // MARK: - 3. Kernel Details Card
     private var kernelDetailsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Thông Số Kỹ Thuật Kernel")
+            Text("Thông Số Kỹ Thuật Kernel & Exploit")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(Theme.textTertiary)
 
             VStack(spacing: 8) {
+                detailRow(label: "Exploit Engine:", value: KernelExploit.shared().exploitEngineName)
+                detailRow(label: "Quyền Hạn:", value: manager.isExploited ? "Root (uid=0) & Unsandboxed ✅" : "Sandboxed (Mobile) ⚠️")
                 detailRow(label: "Kernel Base:", value: String(format: "0x%llX", KernelExploit.shared().kernelBase))
                 detailRow(label: "Kernel Slide:", value: String(format: "0x%llX", KernelExploit.shared().kernelSlide))
                 detailRow(label: "allproc Pointer:", value: String(format: "0x%llX", KernelExploit.shared().allprocAddress))
-                detailRow(label: "Quyền Truy Cập:", value: manager.isExploited ? "Đọc/Ghi Trực Tiếp struct proc_t" : "Chưa Kích Hoạt")
+                detailRow(label: "Truy Cập proc_t:", value: manager.isExploited ? "Direct Read/Write Enabled" : "Locked")
             }
             .padding(12)
             .background(Theme.bgCard)

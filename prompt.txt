@@ -1,9 +1,2 @@
-bạn nhớ làm github workflow để build lên github vì tui ko có macos và đây là repo của tui https://github.com/Mobimi/jetsam-ios-16-18
-
-branch là main nha và nhớ tạo giao diện dễ dùng và 1 cái status check xem kernel đã exploit chưa và 1 bảng console để check log 
-
-và nhớ làm giao diện đơn giản dễ dùng theo kiểu
-vô sẽ hiện danh sách app ở mục list app còn mục setting sẽ có bảng console và status kernel đã exploit được hay chưa và log lỗi như nào
-trong mục danh sách app sẽ chỉ cần gõ tên app hoặc bundle app là ra app đó hoặc kéo để chọn app trong danh sách
-và bấm vào app đó để nó sẽ chuyển qua giao diện có bảng sửa jetsam cho app ( bắt buộc app phải đã được mở rồi chỉnh mới được app chưa được mở dạng chạy ngầm chưa làm được)
-sau khi chỉnh xong jetsam set cho app đó bấm apply nó sẽ hiện thông báo ở dưới đã apply thành công hay chưa để biết jetsam đã được chỉnh chưa
+được rồi đổi project này từ jetsam sang thành toolbox ios đi support ios 16-18.4.1 đổ lên 
+chứa các chức năng như ôg nói dạng thuộc exploit đó đương nhiên trước khi dùng phải exploit kernel trước ôg cũng có thể tham khảo kernel như của app lara làm bởi trần khánh duy trên github

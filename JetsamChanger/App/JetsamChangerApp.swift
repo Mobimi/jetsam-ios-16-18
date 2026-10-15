@@ -1,10 +1,10 @@
 import SwiftUI
 
 @main
-struct JetsamChangerApp: App {
+struct LaraToolboxApp: App {
     init() {
-        // Pre-warm ProcessManager and probe system on boot
-        _ = ProcessManager.shared
+        // Pre-warm ToolboxManager and probe system on boot
+        _ = ToolboxManager.shared
     }
 
     var body: some Scene {

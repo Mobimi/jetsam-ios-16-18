@@ -89,10 +89,10 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: JetsamChanger-Release
+          name: LaraToolbox-Release
           path: |
-            build_output/JetsamChanger.ipa
-            build_output/JetsamChanger.tipa
+            build_output/*.ipa
+            build_output/*.tipa
           if-no-files-found: error
           retention-days: 30
 
@@ -100,25 +100,40 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "Jetsam Changer v1.0 (Build ${{ github.run_number }})"
+          tag_name: v2.0.${{ github.run_number }}
+          name: "Lara Toolbox v2.0 (Build ${{ github.run_number }})"
           fail_on_unmatched_files: false
           body: |
-            ## 🚀 Jetsam Changer (iOS 17.x – 18.x)
+            ## 🚀 Lara Toolbox (iOS 16.0 – 18.4.1+)
             
-            Ứng dụng chỉnh bộ nhớ Jetsam & Priority cho iOS 17.0 - 18.x tích hợp **Automated Kernel Exploit** và **Dynamic Offset Calibration**.
+            Bộ công cụ Exploit Toolbox toàn diện cho iOS 16.0 – 18.4.1+ tích hợp kiến trúc **DarkSword / kfd** (tối ưu đặc biệt cho chip A14 Bionic / arm64e).
 
             ### 📦 Tệp Cài Đặt:
-            - **`JetsamChanger.tipa`**: Dành cho **TrollStore** (iOS 17.0).
-            - **`JetsamChanger.ipa`**: Dành cho **SideStore / AltStore / Sideloadly** (iOS 17.1 – 18.x).
+            - **`LaraToolbox.tipa`**: Dành cho **TrollStore** (iOS 14.0 - 17.0).
+            - **`LaraToolbox.ipa`**: Dành cho **SideStore / AltStore / Feather / Sideloadly** (iOS 16.0 - 18.4.1+).
 
-            ### ✨ Tính Năng:
-            - Giao diện đơn giản chia thành 2 tab: **Danh Sách App** và **Cài Đặt & Console**.
-            - Tìm kiếm app nhanh chóng qua tên app hoặc Bundle ID.
-            - Điều chỉnh mức RAM Jetsam tùy ý từ 512 MB lên đến 16 GB hoặc chế độ **Không Giới Hạn (Unlimited ∞)**.
-            - Hỗ trợ các preset cấu hình nhanh: Amethyst / Pojav (6GB), Giả lập Dolphin/UTM (4GB).
-            - Bảng Console & Status kiểm tra chi tiết trạng thái Kernel Exploit và log lỗi.
+            ### ✨ Các Chức Năng Nổi Bật:
+            1. **💉 Tiêm Tweak Trực Tiếp (In-Place Dylib Injector)**:
+               - Quét danh sách app đã cài đặt trên máy.
+               - Chọn file `.dylib` từ ứng dụng Tệp và tiêm trực tiếp vào binary Mach-O (`LC_LOAD_DYLIB`).
+               - **KHÔNG CẦN XOÁ HAY CÀI LẠI APP**, giữ nguyên 100% dữ liệu.
+               - Hỗ trợ nút **Gỡ Tweak (Eject)** và **Khôi Phục Bản Gốc (.orig)**.
+            2. **⚙️ Quản Lý Dịch Vụ Ngầm (LaunchDaemons Manager)**:
+               - Nút **Tối Ưu 1-Chạm**: Đóng băng ReportCrash, Telemetry, OTA update, giải phóng ~400MB+ RAM và làm mát máy tức thì.
+               - Bật/tắt từng LaunchDaemon tùy ý.
+            3. **🛠️ Tiện Ích Exploit Chuyên Sâu**:
+               - **Gaming Thermal Bypass**: Khóa 100% độ sáng màn hình, giữ max xung nhịp CPU/GPU khi chơi game nặng, chống drop FPS.
+               - **JIT On-Device Enabler**: Kích hoạt JIT cho PojavLauncher (Minecraft), Dolphin, PPSSPP, UTM không cần PC/Wi-Fi.
+               - **Fake GPS Tầng Kernel**: Hook locationd giả lập vị trí toàn hệ thống, chống phát hiện tuyệt đối.
+               - **Chặn Cập Nhật iOS Vĩnh Viễn**: Đóng băng daemon softwareupdated.
+               - **Bật Dynamic Island**: Cho các dòng máy A14 / iPhone 12.
+               - **Bộ Điều Khiển Jetsam & RAM**: Chỉnh RAM lên đến 16 GB hoặc Không Giới Hạn (-1).
+            4. **💻 Console & Kernel Status**:
+               - Quản lý trạng thái DarkSword Kernel Exploit, PAC, SPTM, Root (`uid=0`), Unsandbox.
+               - Terminal log theo thời gian thực.
           files: |
+            build_output/LaraToolbox.ipa
+            build_output/LaraToolbox.tipa
             build_output/JetsamChanger.ipa
             build_output/JetsamChanger.tipa
           draft: false

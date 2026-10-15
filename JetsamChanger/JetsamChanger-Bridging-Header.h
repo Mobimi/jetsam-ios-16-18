@@ -5,5 +5,7 @@
 #import "Core/Kernel/KernelMemory.h"
 #import "Core/Kernel/KernelExploit.h"
 #import "Core/Kernel/JetsamModifier.h"
+#import "Core/Kernel/DylibInjector.h"
+#import "Core/Kernel/DaemonManager.h"
 
 #endif /* JetsamChanger_Bridging_Header_h */

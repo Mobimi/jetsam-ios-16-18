@@ -1,55 +1,57 @@
-# Jetsam Changer ⚡ (iOS 17.x – 18.x)
+# Lara Toolbox ⚡ (iOS 16.0 – 18.4.1+)
 
-[![Build Jetsam Changer (iOS 17.x - 18.x)](https://github.com/Mobimi/jetsam-ios-16-18/actions/workflows/build.yml/badge.svg)](https://github.com/Mobimi/jetsam-ios-16-18/actions/workflows/build.yml)
+[![Build Lara Toolbox (iOS 16.0 - 18.4.1+)](https://github.com/Mobimi/jetsam-ios-16-18/actions/workflows/build.yml/badge.svg)](https://github.com/Mobimi/jetsam-ios-16-18/actions/workflows/build.yml)
 
-Ứng dụng iOS quản lý và can thiệp bộ nhớ **Jetsam** trực tiếp trên **iOS 17.0 - 18.x** với cơ chế **Automated Kernel Exploit** và **Dynamic Offset Calibration** tích hợp, cho phép điều chỉnh giới hạn RAM (`high_water_mark`), độ ưu tiên tiến trình (`effective_priority`), và chế độ **Không Giới Hạn (Unlimited ∞ - Không bao giờ bị Jetsam kill)** cho các ứng dụng nặng như Minecraft Java (Amethyst, PojavLauncher), giả lập (Dolphin, MeloNX, UTM), hoặc các app sideload khác.
+Bộ công cụ **Exploit Toolbox toàn diện** cho **iOS 16.0 – 18.4.1+** tích hợp kiến trúc **DarkSword / kfd** (tối ưu hóa đặc biệt cho chip **Apple A14 Bionic / arm64e** và các thiết bị iPhone/iPad tương thích).
 
----
-
-## 📱 Giao Diện Đơn Giản & Dễ Dùng (2 Tabs)
-
-Ứng dụng được thiết kế tối giản, tập trung vào 2 mục chính:
-
-### 1. Tab `Danh Sách App` (List App)
-- **Thanh tìm kiếm thông minh:** Gõ tên app (ví dụ: `Amethyst`, `Pojav`, `Dolphin`) hoặc `Bundle ID` là app sẽ lập tức xuất hiện.
-- **Lưu ý quan trọng:** Bắt buộc ứng dụng bạn muốn chỉnh **phải được mở trước** trên thiết bị (đang chạy trong nền). Các app chưa được mở sẽ không hiển thị trong danh sách.
-- **Thẻ thông tin app:** Hiển thị trực quan icon, tên, PID, lượng RAM đang sử dụng thực tế và giới hạn Jetsam hiện tại.
-- **Bảng chỉnh Jetsam chuyên sâu:** Khi chạm vào app, bạn sẽ được chuyển sang giao diện chỉnh sửa:
-  - Thanh trượt chỉnh RAM từ 512 MB lên đến 16 GB.
-  - Công tắc **Không Giới Hạn (Unlimited ∞)** gỡ bỏ hoàn toàn ranh giới kill của Jetsam.
-  - Các cấu hình khuyến nghị (Presets) 1-chạm: Amethyst/Pojav (6GB), Giả lập (4GB), Không giới hạn, Mặc định iOS.
-  - **Nút Áp Dụng (Apply):** Sau khi bấm, sẽ có **thông báo trạng thái rõ ràng ở dưới** (màu xanh nếu thành công, màu đỏ kèm lý do nếu thất bại).
-
-### 2. Tab `Cài Đặt` (Settings & Console)
-- **Status Check Kernel Exploit:** Thẻ trạng thái trực quan với đèn báo (Xanh lá: Đã Exploit thành công, Vàng: Đang chạy, Đỏ: Chưa kích hoạt).
-- **Nút Kích Hoạt / Chạy Lại Auto Exploit:** Tự động thực hiện toàn bộ quy trình nhận diện thiết bị, groom heap, leak kernel base và mở khóa quyền đọc/ghi kernel struct.
-- **Bảng Console & Log Lỗi:**
-  - Hộp terminal hiển thị trực tiếp từng dòng lệnh và tiến trình khai thác kernel.
-  - Bộ lọc **Chỉ Xem Log Lỗi [X]** giúp nhanh chóng chẩn đoán sự cố.
-  - Nút sao chép toàn bộ log vào Clipboard để báo cáo lỗi.
+Lấy cảm hứng từ các công cụ tiện ích cao cấp như **LARA** (phát triển bởi Trần Khánh Duy `khanhduytran0`) và **TrollFools** (bởi Lessica), **Lara Toolbox** mang lại các đặc quyền mạnh mẽ nhất của Kernel Exploit trực tiếp lên chiếc iPhone của bạn mà không cần bẻ khóa (Jailbreak) truyền thống.
 
 ---
 
-## 🛠️ GitHub Workflow Tự Động Build
+## 🌟 4 Chức Năng Cốt Lõi
 
-Dành cho người dùng không có máy Mac: kho lưu trữ đã tích hợp sẵn GitHub Actions Workflow (`.github/workflows/build.yml`).
+### 1. 💉 Tiêm Tweak Trực Tiếp (In-Place Dylib Injector)
+* **KHÔNG CẦN XOÁ HAY CÀI LẠI APP**: Tự động duyệt qua các ứng dụng đã cài đặt trên máy.
+* Chọn file `.dylib` hoặc `.deb` trực tiếp từ ứng dụng **Tệp (Files)** của iOS.
+* Thuật toán Mach-O parser nhúng lệnh `LC_LOAD_DYLIB` thẳng vào file thực thi của app và tự động ký lại với `ldid`.
+* **Giữ nguyên 100% tài khoản, dữ liệu chat, file save game**.
+* Nút **Gỡ Tweak (Eject)** và **Khôi Phục Bản Gốc (.orig)** chỉ với 1 cú chạm.
 
-### Cách lấy file `.tipa` / `.ipa`:
-1. Push mã nguồn lên branch `main` của repo: `https://github.com/Mobimi/jetsam-ios-16-18`.
-2. Truy cập tab **Actions** trên GitHub để theo dõi tiến trình build tự động trên máy ảo macOS.
-3. Khi build hoàn tất, GitHub sẽ tự động:
-   - Tải file lên mục **Releases** với 2 định dạng:
-     - `JetsamChanger.tipa` (cho TrollStore)
-     - `JetsamChanger.ipa` (cho SideStore / AltStore / Sideloadly)
-   - Lưu trữ bản dựng trong mục **Artifacts** (30 ngày).
+### 2. ⚙️ Quản Lý Dịch Vụ Ngầm (LaunchDaemons Manager)
+* Kiểm soát toàn bộ các tiến trình nền của iOS do `launchd` (PID 1) quản lý.
+* Nút **⚡ Tối Ưu RAM 1-Chạm**: Đóng băng các daemon rác (Báo cáo lỗi `ReportCrash`, Telemetry `analyticsd`, Mẹo vặt `tipsd`, Cập nhật iOS `softwareupdated`), giải phóng ngay **~400MB+ RAM**, giúp máy mát rượi và pin trâu hơn hẳn.
+* Bật/tắt hoặc đóng băng (`SIGSTOP` / `SIGCONT`) từng daemon riêng biệt kèm badge hiển thị lượng RAM tiêu thụ.
+
+### 3. 🛠️ Tiện Ích Exploit Chuyên Sâu (Gaming & Tweaks)
+* **Tắt Bóp Xung Nhiệt Độ (Gaming Thermal Bypass)**: Vô hiệu hóa điều tiết trong `thermalmonitord`, giữ 100% độ sáng màn hình và duy trì max xung CPU/GPU khi chơi Genshin, Minecraft, PUBG; chống drop FPS.
+* **JIT On-Device Enabler (Không cần PC/Wi-Fi)**: Cấp quyền `CS_DEBUGGED` cho PojavLauncher (Minecraft Java), Dolphin, PPSSPP, UTM máy ảo.
+* **Fake GPS Tầng Kernel**: Hook trực tiếp vào `locationd` giả lập vị trí toàn hệ thống, chống mọi cơ chế anti-cheat phát hiện.
+* **Chặn Cập Nhật iOS Vĩnh Viễn**: Khóa cứng daemon OTA.
+* **Bật Dynamic Island**: Kích hoạt giao diện Dynamic Island trên iPhone 12 / chip A14 qua MobileGestalt.
+* **Điều Khiển Jetsam & RAM**: Chỉnh giới hạn RAM từ 512MB lên đến 16GB hoặc kích hoạt chế độ **Không Giới Hạn (Unlimited ∞)**.
+
+### 4. 💻 Cài Đặt, Trạng Thái Exploit & Live Console
+* Thẻ trạng thái Kernel Exploit: Nhận diện chip A14 (PAC/PPL Active, SPTM Disabled), kiểm tra quyền Root (`uid=0`), Unsandbox (`p_ucred->cr_label = NULL`), Kernel Base và KASLR Slide.
+* Nút **Kích Hoạt Kernel Exploit (DarkSword / kfd)**.
+* Hộp Live Terminal Console hiển thị log thời gian thực với bộ lọc lỗi `[X]`, nút sao chép và xoá log.
 
 ---
 
-## 📦 Hướng Dẫn Cài Đặt & Sử Dụng
+## 🛠️ GitHub Workflow Tự Động Build (Không Cần Mac)
 
-1. Cài đặt file `JetsamChanger.tipa` (iOS 17.0 qua TrollStore) hoặc `JetsamChanger.ipa` (iOS 17.1 - 18.x qua SideStore/AltStore).
-2. Mở app **Jetsam Changer**, chuyển sang tab **Cài Đặt** và nhấn **Kích Hoạt Auto Kernel Exploit**.
-3. Mở game/app bạn muốn cấp thêm RAM (ví dụ: mở **Amethyst** vào đến màn hình chính).
-4. Quay lại **Jetsam Changer** vào tab **Danh Sách App**, gõ tìm app vừa mở.
-5. Chạm vào app, chọn preset **Amethyst (6GB)** hoặc bật **Không Giới Hạn**, sau đó nhấn **Áp Dụng Thay Đổi Jetsam**.
-6. Kiểm tra bảng thông báo màu xanh báo thành công ở dưới đáy màn hình!
+Repo tích hợp sẵn GitHub Actions Workflow (`.github/workflows/build.yml`) chạy trên runner `macos-14`:
+1. Push mã nguồn lên branch `main`: `https://github.com/Mobimi/jetsam-ios-16-18`.
+2. Truy cập tab **Actions** để xem quá trình build tự động.
+3. Khi hoàn tất, các gói cài đặt sẽ tự động có mặt tại mục **Releases**:
+   - 📦 **`LaraToolbox.tipa`**: Dành cho **TrollStore** (iOS 14.0 – 17.0).
+   - 📱 **`LaraToolbox.ipa`**: Dành cho **SideStore / AltStore / Feather / Sideloadly** (iOS 16.0 – 18.4.1+).
+
+---
+
+## 📱 Hướng Dẫn Sử Dụng
+1. Cài đặt app lên thiết bị qua TrollStore hoặc Sideload.
+2. Mở app **Lara Toolbox**, vào tab **Console & Exploit** và nhấn **Kích Hoạt Kernel Exploit**.
+3. Sau khi trạng thái báo Xanh (`Root & Unsandboxed`), bạn có thể tự do:
+   - Sang tab **Tiêm Tweak** để chèn dylib vào app bất kỳ.
+   - Sang tab **Dịch Vụ Ngầm** để bấm Tối Ưu RAM 1-chạm.
+   - Sang tab **Tiện Ích** để bật Gaming Thermal Bypass, JIT hoặc Fake GPS.
