@@ -228,159 +228,167 @@ struct DylibInjectorView: View {
 
             ScrollView {
                 VStack(spacing: 16) {
-                    // Header
-                    HStack(spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Theme.gradientCyanPurple)
-                                .frame(width: 56, height: 56)
-                            Image(systemName: "app.gift.fill")
-                                .font(.system(size: 26))
-                                .foregroundColor(.white)
-                        }
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(app.displayName)
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Theme.textPrimary)
-                            Text(app.bundleID)
-                                .font(.system(size: 12))
-                                .foregroundColor(Theme.textSecondary)
-                                .lineLimit(1)
-                        }
-                        Spacer()
-                    }
-                    .padding(14)
-                    .background(Theme.bgCard)
-                    .cornerRadius(16)
-
-                    // Injected tweaks list
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("TWEAK / DYLIB ĐÃ CHÈN TRỰC TIẾP")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Theme.textTertiary)
-
-                        if app.injectedDylibs.isEmpty {
-                            Text("Chưa có dylib nào được tiêm vào app này.")
-                                .font(.system(size: 12))
-                                .foregroundColor(Theme.textTertiary)
-                                .padding(12)
-                        } else {
-                            ForEach(app.injectedDylibs, id: \.self) { dylib in
-                                HStack {
-                                    Image(systemName: "puzzlepiece.fill")
-                                        .foregroundColor(Theme.accentGreen)
-                                    Text(dylib)
-                                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                        .foregroundColor(Theme.textPrimary)
-                                    Spacer()
-                                    Button(action: {
-                                        _ = manager.ejectDylib(named: dylib, from: app)
-                                    }) {
-                                        Text("Gỡ (Eject)")
-                                            .font(.system(size: 11, weight: .bold))
-                                            .foregroundColor(Theme.accentRed)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 4)
-                                            .background(Theme.accentRed.opacity(0.15))
-                                            .cornerRadius(6)
-                                    }
-                                }
-                                .padding(12)
-                                .background(Theme.bgCard)
-                                .cornerRadius(12)
-                            }
-                        }
-                    }
-
-                    // Tweak Picker Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("TIÊM TWEAK MỚI (IN-PLACE INJECTION)")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Theme.textTertiary)
-
-                        Button(action: { showingFilePicker = true }) {
-                            HStack {
-                                Image(systemName: "folder.badge.plus")
-                                    .font(.system(size: 16))
-                                Text(pickedDylibName.isEmpty ? "Chọn file .dylib từ Ứng dụng Tệp..." : pickedDylibName)
-                                    .font(.system(size: 13, weight: .medium))
-                                    .lineLimit(1)
-                                Spacer()
-                                Image(systemName: "chevron.up.and.down")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Theme.textTertiary)
-                            }
-                            .padding(14)
-                            .background(Theme.bgSecondary)
-                            .foregroundColor(pickedDylibName.isEmpty ? Theme.textSecondary : Theme.accentCyan)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Theme.accentCyan.opacity(0.3), lineWidth: 1)
-                            )
-                        }
-
-                        // Inject Button
-                        Button(action: {
-                            if let url = pickedDylibURL {
-                                let (ok, msg) = manager.injectDylib(url: url, to: app)
-                                isSuccess = ok
-                                statusMessage = msg
-                                showStatusBanner = true
-                            }
-                        }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "bolt.badge.checkmark.fill")
-                                Text("Tiêm Tweak Ngay (Inject)")
-                                    .font(.system(size: 15, weight: .bold))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(pickedDylibURL == nil ? Theme.bgSecondary : Theme.gradientCyanPurple)
-                            .foregroundColor(.white)
-                            .cornerRadius(14)
-                        }
-                        .disabled(pickedDylibURL == nil)
-
-                        // Status Banner
-                        if showStatusBanner {
-                            HStack(spacing: 10) {
-                                Image(systemName: isSuccess ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                                    .foregroundColor(isSuccess ? Theme.accentGreen : Theme.accentRed)
-                                Text(statusMessage)
-                                    .font(.system(size: 12))
-                                    .foregroundColor(Theme.textPrimary)
-                                Spacer()
-                            }
-                            .padding(12)
-                            .background((isSuccess ? Theme.accentGreen : Theme.accentRed).opacity(0.15))
-                            .cornerRadius(10)
-                        }
-
-                        // Restore original pristine binary
-                        Button(action: {
-                            _ = manager.restoreOriginalApp(app: app)
-                            isSuccess = true
-                            statusMessage = "Đã khôi phục file binary gốc (.orig)!"
-                            showStatusBanner = true
-                        }) {
-                            HStack {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text("Khôi Phục File Gốc Ban Đầu (.orig)")
-                                    .font(.system(size: 12, weight: .semibold))
-                            }
-                            .foregroundColor(Theme.accentAmber)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                        }
-                    }
-                    .padding(14)
-                    .background(Theme.bgCard)
-                    .cornerRadius(16)
+                    sheetHeader(app)
+                    sheetInjectedDylibs(app)
+                    sheetTweakPicker(app)
                 }
                 .padding(16)
             }
         }
     }
+
+    private func sheetHeader(_ app: InstalledAppItem) -> some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Theme.gradientCyanPurple)
+                    .frame(width: 56, height: 56)
+                Image(systemName: "app.gift.fill")
+                    .font(.system(size: 26))
+                    .foregroundColor(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(app.displayName)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(app.bundleID)
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+        }
+        .padding(14)
+        .background(Theme.bgCard)
+        .cornerRadius(16)
+    }
+
+    private func sheetInjectedDylibs(_ app: InstalledAppItem) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("TWEAK / DYLIB ĐÃ CHÈN TRỰC TIẾP")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Theme.textTertiary)
+
+            if app.injectedDylibs.isEmpty {
+                Text("Chưa có dylib nào được tiêm vào app này.")
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.textTertiary)
+                    .padding(12)
+            } else {
+                ForEach(app.injectedDylibs, id: \.self) { dylib in
+                    HStack {
+                        Image(systemName: "puzzlepiece.fill")
+                            .foregroundColor(Theme.accentGreen)
+                        Text(dylib)
+                            .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                            .foregroundColor(Theme.textPrimary)
+                        Spacer()
+                        Button(action: {
+                            _ = manager.ejectDylib(named: dylib, from: app)
+                        }) {
+                            Text("Gỡ (Eject)")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(Theme.accentRed)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Theme.accentRed.opacity(0.15))
+                                .cornerRadius(6)
+                        }
+                    }
+                    .padding(12)
+                    .background(Theme.bgCard)
+                    .cornerRadius(12)
+                }
+            }
+        }
+    }
+
+    private func sheetTweakPicker(_ app: InstalledAppItem) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("TIÊM TWEAK MỚI (IN-PLACE INJECTION)")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Theme.textTertiary)
+
+            Button(action: { showingFilePicker = true }) {
+                HStack {
+                    Image(systemName: "folder.badge.plus")
+                        .font(.system(size: 16))
+                    Text(pickedDylibName.isEmpty ? "Chọn file .dylib từ Ứng dụng Tệp..." : pickedDylibName)
+                        .font(.system(size: 13, weight: .medium))
+                        .lineLimit(1)
+                    Spacer()
+                    Image(systemName: "chevron.up.and.down")
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.textTertiary)
+                }
+                .padding(14)
+                .background(Theme.bgSecondary)
+                .foregroundColor(pickedDylibName.isEmpty ? Theme.textSecondary : Theme.accentCyan)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Theme.accentCyan.opacity(0.3), lineWidth: 1)
+                )
+            }
+
+            // Inject Button
+            Button(action: {
+                if let url = pickedDylibURL {
+                    let (ok, msg) = manager.injectDylib(url: url, to: app)
+                    isSuccess = ok
+                    statusMessage = msg
+                    showStatusBanner = true
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "bolt.badge.checkmark.fill")
+                    Text("Tiêm Tweak Ngay (Inject)")
+                        .font(.system(size: 15, weight: .bold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(pickedDylibURL == nil ? Theme.bgSecondary : Theme.gradientCyanPurple)
+                .foregroundColor(.white)
+                .cornerRadius(14)
+            }
+            .disabled(pickedDylibURL == nil)
+
+            // Status Banner
+            if showStatusBanner {
+                HStack(spacing: 10) {
+                    Image(systemName: isSuccess ? "checkmark.circle.fill" : "xmark.octagon.fill")
+                        .foregroundColor(isSuccess ? Theme.accentGreen : Theme.accentRed)
+                    Text(statusMessage)
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.textPrimary)
+                    Spacer()
+                }
+                .padding(12)
+                .background((isSuccess ? Theme.accentGreen : Theme.accentRed).opacity(0.15))
+                .cornerRadius(10)
+            }
+
+            // Restore original pristine binary
+            Button(action: {
+                _ = manager.restoreOriginalApp(app: app)
+                isSuccess = true
+                statusMessage = "Đã khôi phục file binary gốc (.orig)!"
+                showStatusBanner = true
+            }) {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Khôi Phục File Gốc Ban Đầu (.orig)")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                .foregroundColor(Theme.accentAmber)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+            }
+        }
+        .padding(14)
+        .background(Theme.bgCard)
+        .cornerRadius(16)
+    }
 }
+

@@ -204,96 +204,104 @@ struct JITManagerView: View {
             Theme.bgPrimary.ignoresSafeArea()
 
             VStack(spacing: 20) {
-                // Header
-                HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Theme.gradientCyanPurple)
-                            .frame(width: 56, height: 56)
-                        Image(systemName: "bolt.badge.checkmark.fill")
-                            .font(.system(size: 26))
-                            .foregroundColor(.white)
-                    }
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(app.displayName)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Theme.textPrimary)
-                        Text(app.bundleID)
-                            .font(.system(size: 12))
-                            .foregroundColor(Theme.textSecondary)
-                            .lineLimit(1)
-                    }
-                    Spacer()
-                }
-                .padding(14)
-                .background(Theme.bgCard)
-                .cornerRadius(16)
-
-                // JIT Status Box
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("TRẠNG THÁI JIT TẦNG NHÂN")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(Theme.textTertiary)
-
-                    HStack {
-                        Text("Trạng thái:")
-                            .font(.system(size: 13))
-                            .foregroundColor(Theme.textSecondary)
-                        Spacer()
-                        Text(app.isJITEnabled ? "Đã Kích Hoạt Vĩnh Viễn ✅" : "Chưa Kích Hoạt ⚠️")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(app.isJITEnabled ? Theme.accentGreen : Theme.accentAmber)
-                    }
-
-                    Divider().background(Theme.bgSecondary)
-
-                    Text("Khi kích hoạt, cờ CS_DEBUGGED và quyền dynamic-codesigning sẽ được tiêm trực tiếp vào tiến trình app. Bạn chỉ cần mở app lên là chơi game tốc độ cao ngay mà không cần máy tính Mac/PC hay mạng Wi-Fi.")
-                        .font(.system(size: 11))
-                        .foregroundColor(Theme.textSecondary)
-                }
-                .padding(14)
-                .background(Theme.bgCard)
-                .cornerRadius(16)
-
-                // Activate Button
-                Button(action: {
-                    let (ok, msg) = manager.enablePermanentJIT(for: app)
-                    isSuccess = ok
-                    statusMessage = ok ? "Đã kích hoạt JIT vĩnh viễn cho \(app.displayName)! Bây giờ bạn có thể mở app lên và tận hưởng 60-120 FPS." : msg
-                    showResultBanner = true
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "bolt.fill")
-                        Text("Kích Hoạt JIT Vĩnh Viễn (On-Device)")
-                            .font(.system(size: 15, weight: .bold))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Theme.gradientCyanPurple)
-                    .foregroundColor(.white)
-                    .cornerRadius(16)
-                    .glow(color: Theme.accentGreen, radius: 8)
-                }
-
-                // Result Banner
+                jitAppHeader(app)
+                jitStatusCard(app)
+                jitActionButton(app)
                 if showResultBanner {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: isSuccess ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                            .foregroundColor(isSuccess ? Theme.accentGreen : Theme.accentRed)
-                        Text(statusMessage)
-                            .font(.system(size: 12))
-                            .foregroundColor(Theme.textPrimary)
-                        Spacer()
-                    }
-                    .padding(12)
-                    .background((isSuccess ? Theme.accentGreen : Theme.accentRed).opacity(0.15))
-                    .cornerRadius(12)
+                    jitResultBanner
                 }
-
                 Spacer()
             }
             .padding(16)
         }
+    }
+
+    private func jitAppHeader(_ app: InstalledAppItem) -> some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Theme.gradientCyanPurple)
+                    .frame(width: 56, height: 56)
+                Image(systemName: "bolt.badge.checkmark.fill")
+                    .font(.system(size: 26))
+                    .foregroundColor(.white)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(app.displayName)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(app.bundleID)
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+        }
+        .padding(14)
+        .background(Theme.bgCard)
+        .cornerRadius(16)
+    }
+
+    private func jitStatusCard(_ app: InstalledAppItem) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("TRẠNG THÁI JIT TẦNG NHÂN")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Theme.textTertiary)
+
+            HStack {
+                Text("Trạng thái:")
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.textSecondary)
+                Spacer()
+                Text(app.isJITEnabled ? "Đã Kích Hoạt Vĩnh Viễn ✅" : "Chưa Kích Hoạt ⚠️")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(app.isJITEnabled ? Theme.accentGreen : Theme.accentAmber)
+            }
+
+            Divider().background(Theme.bgSecondary)
+
+            Text("Khi kích hoạt, cờ CS_DEBUGGED và quyền dynamic-codesigning sẽ được tiêm trực tiếp vào tiến trình app. Bạn chỉ cần mở app lên là chơi game tốc độ cao ngay mà không cần máy tính Mac/PC hay mạng Wi-Fi.")
+                .font(.system(size: 11))
+                .foregroundColor(Theme.textSecondary)
+        }
+        .padding(14)
+        .background(Theme.bgCard)
+        .cornerRadius(16)
+    }
+
+    private func jitActionButton(_ app: InstalledAppItem) -> some View {
+        Button(action: {
+            let (ok, msg) = manager.enablePermanentJIT(for: app)
+            isSuccess = ok
+            statusMessage = ok ? "Đã kích hoạt JIT vĩnh viễn cho \(app.displayName)! Bây giờ bạn có thể mở app lên và tận hưởng 60-120 FPS." : msg
+            showResultBanner = true
+        }) {
+            HStack(spacing: 8) {
+                Image(systemName: "bolt.fill")
+                Text("Kích Hoạt JIT Vĩnh Viễn (On-Device)")
+                    .font(.system(size: 15, weight: .bold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Theme.gradientCyanPurple)
+            .foregroundColor(.white)
+            .cornerRadius(16)
+            .glow(color: Theme.accentGreen, radius: 8)
+        }
+    }
+
+    private var jitResultBanner: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: isSuccess ? "checkmark.circle.fill" : "xmark.octagon.fill")
+                .foregroundColor(isSuccess ? Theme.accentGreen : Theme.accentRed)
+            Text(statusMessage)
+                .font(.system(size: 12))
+                .foregroundColor(Theme.textPrimary)
+            Spacer()
+        }
+        .padding(12)
+        .background((isSuccess ? Theme.accentGreen : Theme.accentRed).opacity(0.15))
+        .cornerRadius(12)
     }
 }
