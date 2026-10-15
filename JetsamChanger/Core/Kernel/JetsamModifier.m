@@ -81,16 +81,16 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
 @implementation JetsamModifier
 
 + (instancetype)shared {
-    return [self sharedModifier];
-}
-
-+ (instancetype)sharedModifier {
     static JetsamModifier *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[JetsamModifier alloc] init];
     });
     return instance;
+}
+
++ (instancetype)sharedModifier {
+    return [self shared];
 }
 
 - (NSArray<JetsamProcessModel *> *)getAllRunningProcesses {

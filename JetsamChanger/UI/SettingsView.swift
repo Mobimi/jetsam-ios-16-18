@@ -102,7 +102,7 @@ struct SettingsView: View {
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke((manager.isExploited ? Theme.accentGreen : Theme.accentRed).opacity(0.3), lineWidth: 1)
+                .stroke(manager.isExploited ? Theme.accentGreen.opacity(0.3) : Theme.accentRed.opacity(0.3), lineWidth: 1)
         )
     }
 
@@ -124,7 +124,15 @@ struct SettingsView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(manager.isExploiting ? Theme.bgSecondary : Theme.gradientCyanPurple)
+            .background(
+                Group {
+                    if manager.isExploiting {
+                        Theme.bgSecondary
+                    } else {
+                        Theme.gradientCyanPurple
+                    }
+                }
+            )
             .foregroundColor(.white)
             .cornerRadius(14)
             .glow(color: Theme.accentCyan, radius: 6)

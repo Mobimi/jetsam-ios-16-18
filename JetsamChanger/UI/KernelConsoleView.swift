@@ -64,7 +64,7 @@ struct KernelConsoleView: View {
                                 .stroke(Theme.accentCyan.opacity(0.3), lineWidth: 1)
                         )
                         .padding(.horizontal)
-                        .onChange(of: manager.kernelLogs.count) { _ in
+                        .onChange(of: manager.kernelLogs.count) {
                             if autoScroll, let last = manager.kernelLogs.last {
                                 withAnimation {
                                     proxy.scrollTo(last.id, anchor: .bottom)

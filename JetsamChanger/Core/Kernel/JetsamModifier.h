@@ -24,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JetsamModifier : NSObject
 
 + (instancetype)shared;
-+ (instancetype)sharedModifier;
 
 - (NSArray<JetsamProcessModel *> *)getAllRunningProcesses;
 - (nullable JetsamProcessModel *)getJetsamInfoForPID:(pid_t)pid;
