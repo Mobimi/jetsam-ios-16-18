@@ -36,7 +36,7 @@ struct AppListView: View {
                     }
                 }
             }
-            .navigationTitle("Danh Sách App")
+            .navigationTitle("Chỉnh Jetsam")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -89,29 +89,67 @@ struct AppListView: View {
 
     // MARK: - 2. Notice Banner
     private var noticeRunningAppBanner: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(Theme.accentAmber)
-                .font(.system(size: 16))
-                .padding(.top, 2)
+        Group {
+            if !manager.isExploited {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(Theme.accentAmber)
+                        .font(.system(size: 16))
+                        .padding(.top, 2)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Lưu ý quan trọng:")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(Theme.accentAmber)
-                Text("Bắt buộc bạn phải MỞ APP TRƯỚC rồi chuyển sang đây để chỉnh. Ứng dụng chưa được mở sẽ chưa thể can thiệp Jetsam.")
-                    .font(.system(size: 11))
-                    .foregroundColor(Theme.textSecondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Cần Kích Hoạt Kernel Exploit:")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Theme.accentAmber)
+                        Text("Để thoát khỏi Sandbox và can thiệp bộ nhớ struct proc_t của app, vui lòng kích hoạt Kernel Exploit trước.")
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.textSecondary)
+
+                        Button(action: { manager.triggerAutoExploit() }) {
+                            Text("Kích Hoạt Ngay")
+                                .font(.system(size: 10, weight: .bold))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Theme.accentAmber)
+                                .foregroundColor(.black)
+                                .cornerRadius(6)
+                        }
+                    }
+                    Spacer()
+                }
+                .padding(12)
+                .background(Theme.accentAmber.opacity(0.12))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Theme.accentAmber.opacity(0.3), lineWidth: 1)
+                )
+            } else {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(Theme.accentCyan)
+                        .font(.system(size: 16))
+                        .padding(.top, 2)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Lưu ý quan trọng:")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Theme.accentCyan)
+                        Text("Bắt buộc bạn phải MỞ APP TRƯỚC rồi chuyển sang đây để chỉnh. Ứng dụng chưa được mở sẽ chưa thể can thiệp Jetsam.")
+                            .font(.system(size: 11))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+                    Spacer()
+                }
+                .padding(12)
+                .background(Theme.accentCyan.opacity(0.1))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Theme.accentCyan.opacity(0.25), lineWidth: 1)
+                )
             }
-            Spacer()
         }
-        .padding(12)
-        .background(Theme.accentAmber.opacity(0.12))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Theme.accentAmber.opacity(0.3), lineWidth: 1)
-        )
     }
 
     // MARK: - 3. Search Bar

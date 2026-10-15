@@ -35,6 +35,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
 struct DylibInjectorView: View {
     @ObservedObject var manager = ToolboxManager.shared
     @State private var selectedApp: InstalledAppItem? = nil
+    @State private var isShowingDetail: Bool = false
     @State private var showingFilePicker = false
     @State private var pickedDylibURL: URL? = nil
     @State private var pickedDylibName: String = ""
@@ -83,8 +84,10 @@ struct DylibInjectorView: View {
             }
             .navigationTitle("Tiêm Tweak (Dylib)")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(item: $selectedApp) { app in
-                appDetailSheet(app)
+            .sheet(isPresented: $isShowingDetail) {
+                if let app = selectedApp {
+                    appDetailSheet(app)
+                }
             }
             .sheet(isPresented: $showingFilePicker) {
                 DocumentPicker { url in
@@ -105,7 +108,7 @@ struct DylibInjectorView: View {
                 Text("Cần Kích Hoạt Kernel Exploit")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(Theme.accentAmber)
-                Text("Để can thiệp và chèn dylib trực tiếp mà không cần cài lại app, hãy vào tab 'Cài Đặt & Console' và bấm Kích Hoạt Exploit.")
+                Text("Để thoát Sandbox và quét danh sách app trong máy, hãy bấm nút kích hoạt Kernel Exploit trước.")
                     .font(.system(size: 11))
                     .foregroundColor(Theme.textSecondary)
 
@@ -165,6 +168,7 @@ struct DylibInjectorView: View {
             pickedDylibURL = nil
             pickedDylibName = ""
             showStatusBanner = false
+            isShowingDetail = true
         }) {
             HStack(spacing: 12) {
                 ZStack {

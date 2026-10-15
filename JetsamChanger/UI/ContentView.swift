@@ -6,33 +6,40 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Tab 0: Tiêm Tweak (Dylib Injector)
+            // 1. Inject Dylib (Danh sách app -> chọn dylib -> tiêm)
             DylibInjectorView()
                 .tabItem {
-                    Label("Tiêm Tweak", systemImage: "syringe.fill")
+                    Label("Inject Dylib", systemImage: "syringe.fill")
                 }
                 .tag(0)
 
-            // Tab 1: Dịch Vụ Ngầm (LaunchDaemons)
-            LaunchDaemonsView()
+            // 2. Bật JIT (Danh sách app -> kích hoạt JIT vĩnh viễn on-device)
+            JITManagerView()
                 .tabItem {
-                    Label("Dịch Vụ Ngầm", systemImage: "gearshape.arrow.triangle.2.circlepath")
+                    Label("Bật JIT", systemImage: "bolt.fill")
                 }
                 .tag(1)
 
-            // Tab 2: Tiện Ích Exploit (Gaming, JIT, Fake GPS, Dynamic Island)
-            ExploitTweaksView()
+            // 3. Chỉnh Jetsam (Danh sách app -> ô nhập MB -> Apply)
+            AppListView()
                 .tabItem {
-                    Label("Tiện Ích", systemImage: "wand.and.stars")
+                    Label("Chỉnh Jetsam", systemImage: "memorychip.fill")
                 }
                 .tag(2)
 
-            // Tab 3: Cài Đặt, Trạng Thái Exploit & Console Log
+            // 4. LaunchDaemon (Tắt/bật dịch vụ ngầm, tối ưu RAM 1-chạm)
+            LaunchDaemonsView()
+                .tabItem {
+                    Label("LaunchDaemon", systemImage: "gearshape.2.fill")
+                }
+                .tag(3)
+
+            // 5. Console & Kernel Exploit (Kiểm tra status, kích hoạt DarkSword exploit, log terminal)
             SettingsView()
                 .tabItem {
                     Label("Console & Exploit", systemImage: "terminal.fill")
                 }
-                .tag(3)
+                .tag(4)
         }
         .accentColor(Theme.accentCyan)
         .onAppear {

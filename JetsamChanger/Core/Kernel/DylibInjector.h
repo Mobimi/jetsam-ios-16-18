@@ -3,13 +3,15 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface InstalledAppItem : NSObject
+@property (nonatomic, readonly) NSString *id;
 @property (nonatomic, copy) NSString *displayName;
 @property (nonatomic, copy) NSString *bundleID;
 @property (nonatomic, copy) NSString *bundlePath;
 @property (nonatomic, copy) NSString *executablePath;
 @property (nonatomic, copy) NSString *versionString;
 @property (nonatomic, assign) BOOL isSystemApp;
-@property (nonatomic, strong) NSMutableArray<NSString *> *injectedDylibs;
+@property (nonatomic, copy) NSArray<NSString *> *injectedDylibs;
+@property (nonatomic, assign) BOOL isJITEnabled;
 @end
 
 @interface DylibInjector : NSObject
@@ -30,6 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Restores the app binary to its pristine state (.orig backup)
 - (BOOL)restoreOriginalBinaryForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
+
+/// Enables permanent JIT on-device for an app
+- (BOOL)enablePermanentJITForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
 
 @end
 

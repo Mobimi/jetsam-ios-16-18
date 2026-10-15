@@ -1,2 +1,12 @@
 được rồi đổi project này từ jetsam sang thành toolbox ios đi support ios 16-18.4.1 đổ lên 
 chứa các chức năng như ôg nói dạng thuộc exploit đó đương nhiên trước khi dùng phải exploit kernel trước ôg cũng có thể tham khảo kernel như của app lara làm bởi trần khánh duy trên github
+thêm cho tui như sau
+BẬT JIT vĩnh viễn bằng exploit 
+LAUNCHDAEMON
+INJECT DYLIB
+CHỈNH JETSAM
+riêng 3 cái inject dylib và chỉnh jetsam và bật jit ấy khi bấm vào thì sẽ hiện ra 1 danh sách phần mềm có trong máy luôn ( để hiện được trong danh sách chắc chắn phải bật kernel trước chứ ko nó thoát khỏi sandbox kiểu gì )
+sau đó search app hoặc tự kéo để tìm app bấm vào app mình muốn sau đó chức năng nào ra chức năng đó thôi 
+RIÊNG JETSAM LÀ PHẢI CÓ CÁI Ô NHẬP CHỈNH RỒI BẤM APPLY NHA CÒN XÓA HẾT SỐ RỒI THÌ TỨC LÀ ĐỂ MẶC ĐỊNH HỆ THỐNG IPHONE QUẢN và nhập số theo dạng MB nha tức là ví dụ muốn cấp cho app đó 4gb jetsam thì ghi 4000mb là được đó là ví dụ thôi
+
+LÀM KĨ ĐI NHA CHỨ CÁI MỤC PROBLEM NÓ BÁO LỖI NHIỀU KO BIẾT CÓ DÙNG ĐƯỢC HAY KO 

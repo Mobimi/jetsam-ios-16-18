@@ -82,6 +82,7 @@ xcrun --sdk iphoneos swiftc -target arm64-apple-ios16.0 \
     "JetsamChanger/UI/Theme.swift" \
     "JetsamChanger/UI/ContentView.swift" \
     "JetsamChanger/UI/DylibInjectorView.swift" \
+    "JetsamChanger/UI/JITManagerView.swift" \
     "JetsamChanger/UI/LaunchDaemonsView.swift" \
     "JetsamChanger/UI/ExploitTweaksView.swift" \
     "JetsamChanger/UI/AppListView.swift" \

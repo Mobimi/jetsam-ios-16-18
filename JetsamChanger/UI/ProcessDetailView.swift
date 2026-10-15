@@ -2,10 +2,10 @@ import SwiftUI
 
 struct ProcessDetailView: View {
     let process: JetsamProcessModel
-    @ObservedObject var manager = ProcessManager.shared
+    @ObservedObject var manager = ToolboxManager.shared
     @Environment(\.dismiss) var dismiss
 
-    @State private var targetLimitMB: Double = 4096
+    @State private var inputLimitMBText: String = "4000"
     @State private var isUnlimited: Bool = false
     @State private var selectedPriority: Int16 = 18
     @State private var isFreezable: Bool = false
@@ -30,7 +30,7 @@ struct ProcessDetailView: View {
                     // 3. Quick Presets
                     presetsSection
 
-                    // 4. Jetsam Limit Adjuster (Slider + Unlimited Toggle)
+                    // 4. Jetsam Limit Adjuster (MB Text Input + Unlimited Toggle)
                     jetsamAdjusterCard
 
                     // 5. Priority & Freezer Options
@@ -54,8 +54,10 @@ struct ProcessDetailView: View {
         .onAppear {
             if process.activeLimitMB <= 0 {
                 isUnlimited = true
+                inputLimitMBText = ""
             } else {
-                targetLimitMB = Double(process.activeLimitMB)
+                isUnlimited = false
+                inputLimitMBText = "\(process.activeLimitMB)"
             }
             selectedPriority = process.effectivePriority
             isFreezable = process.isFrozen
@@ -158,35 +160,31 @@ struct ProcessDetailView: View {
                         .foregroundColor(Theme.textTertiary)
                     Text(process.priorityDescription())
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Theme.accentPurple)
+                        .foregroundColor(Theme.textPrimary)
                 }
             }
         }
         .padding(16)
-        .background(Theme.gradientCard)
-        .cornerRadius(18)
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(Theme.accentCyan.opacity(0.15), lineWidth: 1)
-        )
+        .background(Theme.bgCard)
+        .cornerRadius(16)
     }
 
-    // MARK: - 3. Quick Presets Section
+    // MARK: - 3. Quick Presets
     private var presetsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Cấu Hình Khuyến Nghị (Presets)")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(Theme.textPrimary)
+            Text("CẤU HÌNH NHANH (PRESETS)")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(Theme.textTertiary)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                presetCard(title: "Amethyst / Pojav", desc: "6 GB RAM (Mượt game)", icon: "cube.fill", color: Theme.accentGreen) {
-                    targetLimitMB = 6144
+                presetCard(title: "Minecraft / Amethyst", desc: "6000 MB (6 GB)", icon: "cube.fill", color: Theme.accentGreen) {
+                    inputLimitMBText = "6000"
                     isUnlimited = false
                     selectedPriority = 18
                 }
 
-                presetCard(title: "Giả Lập (Dolphin)", desc: "4 GB RAM + JIT", icon: "gamecontroller.fill", color: Theme.accentCyan) {
-                    targetLimitMB = 4096
+                presetCard(title: "Giả Lập (Dolphin / UTM)", desc: "4000 MB (4 GB)", icon: "gamecontroller.fill", color: Theme.accentCyan) {
+                    inputLimitMBText = "4000"
                     isUnlimited = false
                     selectedPriority = 10
                 }
@@ -196,8 +194,8 @@ struct ProcessDetailView: View {
                     selectedPriority = 21
                 }
 
-                presetCard(title: "Mặc Định iOS", desc: "2 GB tiêu chuẩn", icon: "arrow.counterclockwise", color: Theme.textSecondary) {
-                    targetLimitMB = 2048
+                presetCard(title: "Mặc Định iOS", desc: "Để iPhone tự quản", icon: "arrow.counterclockwise", color: Theme.textSecondary) {
+                    inputLimitMBText = ""
                     isUnlimited = false
                     selectedPriority = 10
                 }
@@ -230,11 +228,11 @@ struct ProcessDetailView: View {
         }
     }
 
-    // MARK: - 4. Jetsam Limit Adjuster
+    // MARK: - 4. Jetsam Limit Adjuster (MB Text Field)
     private var jetsamAdjusterCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Bảng Sửa Jetsam Memory Limit")
+                Text("Ô Nhập Hạn Mức RAM Jetsam (MB)")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
 
@@ -266,36 +264,67 @@ struct ProcessDetailView: View {
                 .background(Theme.accentPurple.opacity(0.12))
                 .cornerRadius(12)
             } else {
-                VStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
+                    // Ô NHẬP THEO DẠNG MB
                     HStack {
-                        Text("\(Int(targetLimitMB)) MB")
-                            .font(.system(size: 22, weight: .bold, design: .monospaced))
+                        Image(systemName: "square.and.pencil")
                             .foregroundColor(Theme.accentCyan)
-                        Text(String(format: "(~%.1f GB RAM)", targetLimitMB / 1024.0))
-                            .font(.system(size: 14))
-                            .foregroundColor(Theme.textSecondary)
-                        Spacer()
+                            .font(.system(size: 16))
+
+                        TextField("Nhập số MB (để trống = Mặc định hệ thống)", text: $inputLimitMBText)
+                            .font(.system(size: 16, weight: .bold, design: .monospaced))
+                            .keyboardType(.numberPad)
+                            .foregroundColor(Theme.textPrimary)
+
+                        if !inputLimitMBText.isEmpty {
+                            Text("MB")
+                                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                                .foregroundColor(Theme.accentCyan)
+
+                            Button(action: { inputLimitMBText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(Theme.textTertiary)
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .background(Theme.bgSecondary)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Theme.accentCyan.opacity(0.3), lineWidth: 1)
+                    )
+
+                    // Helper / Explanation line
+                    HStack {
+                        if inputLimitMBText.trimmingCharacters(in: .whitespaces).isEmpty {
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                                .foregroundColor(Theme.accentAmber)
+                            Text("Đang xóa trống: Sẽ để MẶC ĐỊNH HỆ THỐNG iPHONE tự quản lý.")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(Theme.accentAmber)
+                        } else if let mb = Double(inputLimitMBText), mb > 0 {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(Theme.accentGreen)
+                            Text("Sẽ cấp: \(Int(mb)) MB (~ \(String(format: "%.2f", mb / 1024.0)) GB RAM)")
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundColor(Theme.accentGreen)
+                        } else {
+                            Text("Vui lòng nhập số hợp lệ.")
+                                .font(.system(size: 11))
+                                .foregroundColor(Theme.accentRed)
+                        }
                     }
 
-                    Slider(value: $targetLimitMB, in: 512...16384, step: 256)
-                        .tint(Theme.accentCyan)
-
-                    HStack {
-                        Text("512 MB")
-                            .font(.system(size: 10))
-                            .foregroundColor(Theme.textTertiary)
-                        Spacer()
-                        Text("4 GB")
-                            .font(.system(size: 10))
-                            .foregroundColor(Theme.textTertiary)
-                        Spacer()
-                        Text("8 GB")
-                            .font(.system(size: 10))
-                            .foregroundColor(Theme.textTertiary)
-                        Spacer()
-                        Text("16 GB")
-                            .font(.system(size: 10))
-                            .foregroundColor(Theme.textTertiary)
+                    // Quick Select Buttons
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            quickMBButton("2000 MB (2GB)", mb: 2000)
+                            quickMBButton("4000 MB (4GB)", mb: 4000)
+                            quickMBButton("6000 MB (6GB)", mb: 6000)
+                            quickMBButton("8000 MB (8GB)", mb: 8000)
+                            quickMBButton("Xóa Trống (Mặc Định)", mb: 0)
+                        }
                     }
                 }
             }
@@ -303,6 +332,28 @@ struct ProcessDetailView: View {
         .padding(16)
         .background(Theme.bgCard)
         .cornerRadius(16)
+    }
+
+    private func quickMBButton(_ label: String, mb: Int) -> some View {
+        Button(action: {
+            if mb == 0 {
+                inputLimitMBText = ""
+            } else {
+                inputLimitMBText = "\(mb)"
+            }
+        }) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Theme.bgSecondary)
+                .foregroundColor(Theme.textPrimary)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Theme.accentCyan.opacity(0.2), lineWidth: 1)
+                )
+        }
     }
 
     // MARK: - 5. Priority & Freeze
@@ -320,10 +371,17 @@ struct ProcessDetailView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
 
-            Toggle("Cho phép đóng băng nền (Process Freeze)", isOn: $isFreezable)
-                .font(.system(size: 13))
-                .foregroundColor(Theme.textSecondary)
-                .tint(Theme.accentCyan)
+            Toggle(isOn: $isFreezable) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Cho Phép Đóng Băng (App Freezer)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                    Text("Khi chạy ngầm, hệ thống sẽ freeze tiến trình để tiết kiệm RAM.")
+                        .font(.system(size: 11))
+                        .foregroundColor(Theme.textSecondary)
+                }
+            }
+            .tint(Theme.accentCyan)
         }
         .padding(16)
         .background(Theme.bgCard)
@@ -399,18 +457,34 @@ struct ProcessDetailView: View {
                 notificationMessage = "Không thể áp dụng Không Giới Hạn cho PID \(process.pid). Hãy kiểm tra tab Cài Đặt xem Kernel Exploit đã kích hoạt chưa."
             }
         } else {
-            let limit = Int32(targetLimitMB)
-            success = manager.setJetsamLimit(pid: process.pid, limitMB: limit)
-            _ = manager.setPriority(pid: process.pid, priority: selectedPriority)
-            _ = manager.setFreezable(pid: process.pid, isFreezable: isFreezable)
+            let trimmed = inputLimitMBText.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty {
+                // XÓA HẾT SỐ = ĐỂ MẶC ĐỊNH HỆ THỐNG IPHONE TỰ QUẢN
+                success = manager.applyPreset(pid: process.pid, presetName: "System Default")
+                if success {
+                    isApplySuccess = true
+                    notificationMessage = "Đã xóa hạn mức tùy chỉnh: Đưa \(process.name) (PID: \(process.pid)) về MẶC ĐỊNH HỆ THỐNG iPHONE tự quản lý!"
+                } else {
+                    isApplySuccess = false
+                    notificationMessage = "Lỗi khi khôi phục mặc định hệ thống cho PID \(process.pid)."
+                }
+            } else if let mb = Int32(trimmed), mb > 0 {
+                // NHẬP SỐ MB CỤ THỂ
+                success = manager.setJetsamLimit(pid: process.pid, limitMB: mb)
+                _ = manager.setPriority(pid: process.pid, priority: selectedPriority)
+                _ = manager.setFreezable(pid: process.pid, isFreezable: isFreezable)
 
-            if success {
-                isApplySuccess = true
-                let gbString = String(format: "%.1f", Double(limit) / 1024.0)
-                notificationMessage = "Đã chỉnh thành công Jetsam limit cho \(process.name) lên \(limit) MB (~\(gbString) GB) với Priority \(selectedPriority)!"
+                if success {
+                    isApplySuccess = true
+                    let gbString = String(format: "%.2f", Double(mb) / 1024.0)
+                    notificationMessage = "Đã chỉnh thành công Jetsam limit cho \(process.name) lên \(mb) MB (~\(gbString) GB) với Priority \(selectedPriority)!"
+                } else {
+                    isApplySuccess = false
+                    notificationMessage = "Lỗi khi ghi thông số Jetsam vào kernel proc_t cho PID \(process.pid). Vui lòng vào tab Cài Đặt kiểm tra log lỗi."
+                }
             } else {
                 isApplySuccess = false
-                notificationMessage = "Lỗi khi ghi thông số Jetsam vào kernel proc_t cho PID \(process.pid). Vui lòng vào tab Cài Đặt kiểm tra log lỗi."
+                notificationMessage = "Số MB không hợp lệ. Vui lòng nhập số MB lớn hơn 0 (ví dụ: 4000) hoặc xóa trống để về mặc định hệ thống."
             }
         }
 

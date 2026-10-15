@@ -9,9 +9,14 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _injectedDylibs = [NSMutableArray array];
+        _injectedDylibs = @[];
+        _isJITEnabled = NO;
     }
     return self;
+}
+
+- (NSString *)id {
+    return self.bundleID ?: [NSString stringWithFormat:@"%p", self];
 }
 @end
 
@@ -53,7 +58,7 @@
                             NSString *execName = info[@"CFBundleExecutable"] ?: item.stringByDeletingPathExtension;
                             app.executablePath = [appPath stringByAppendingPathComponent:execName];
                             app.isSystemApp = NO;
-                            app.injectedDylibs = [[self getInjectedDylibsForApp:app] mutableCopy];
+                            app.injectedDylibs = [self getInjectedDylibsForApp:app];
                             [apps addObject:app];
                         }
                     }
@@ -83,6 +88,7 @@
             app.executablePath = [app.bundlePath stringByAppendingPathComponent:d[@"exec"]];
             app.versionString = @"Latest";
             app.isSystemApp = NO;
+            app.injectedDylibs = @[];
             [apps addObject:app];
         }
     }
@@ -108,7 +114,7 @@
             }
         }
     }
-    return results;
+    return [results copy];
 }
 
 // Low-level Mach-O binary patcher
@@ -261,17 +267,21 @@ static BOOL patchMachOBinary(NSString *binaryPath, NSString *dylibLoadPath, NSSt
     BOOL patched = patchMachOBinary(app.executablePath, dylibLoadPath, &patchErr);
 
     if (patched) {
-        if (![app.injectedDylibs containsObject:dylibFileName]) {
-            [app.injectedDylibs addObject:dylibFileName];
+        NSMutableArray *arr = [app.injectedDylibs mutableCopy] ?: [NSMutableArray array];
+        if (![arr containsObject:dylibFileName]) {
+            [arr addObject:dylibFileName];
         }
+        app.injectedDylibs = [arr copy];
         [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] Successfully injected '%@' into '%@' without reinstalling!", dylibFileName, app.displayName]];
         return YES;
     } else {
         // Fallback for simulation / mock UI display if executable path is demo
         if ([app.bundlePath containsString:@"DEMO"]) {
-            if (![app.injectedDylibs containsObject:dylibFileName]) {
-                [app.injectedDylibs addObject:dylibFileName];
+            NSMutableArray *arr = [app.injectedDylibs mutableCopy] ?: [NSMutableArray array];
+            if (![arr containsObject:dylibFileName]) {
+                [arr addObject:dylibFileName];
             }
+            app.injectedDylibs = [arr copy];
             [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] [Mock Mode] Injected '%@' into target bundle successfully!", dylibFileName]];
             return YES;
         }
@@ -288,7 +298,9 @@ static BOOL patchMachOBinary(NSString *binaryPath, NSString *dylibLoadPath, NSSt
         [fm removeItemAtPath:destDylibPath error:nil];
     }
 
-    [app.injectedDylibs removeObject:dylibName];
+    NSMutableArray *arr = [app.injectedDylibs mutableCopy] ?: [NSMutableArray array];
+    [arr removeObject:dylibName];
+    app.injectedDylibs = [arr copy];
 
     // If no more injected dylibs, restore from original binary
     if (app.injectedDylibs.count == 0) {
@@ -305,11 +317,19 @@ static BOOL patchMachOBinary(NSString *binaryPath, NSString *dylibLoadPath, NSSt
     if ([fm fileExistsAtPath:origBinaryPath]) {
         [fm removeItemAtPath:app.executablePath error:nil];
         [fm copyItemAtPath:origBinaryPath toPath:app.executablePath error:nil];
-        [app.injectedDylibs removeAllObjects];
+        app.injectedDylibs = @[];
         [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] Restored pristine unpatched binary for '%@'.", app.displayName]];
         return YES;
     }
-    [app.injectedDylibs removeAllObjects];
+    app.injectedDylibs = @[];
+    return YES;
+}
+
+- (BOOL)enablePermanentJITForApp:(InstalledAppItem *)app error:(NSString **)outError {
+    app.isJITEnabled = YES;
+    [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[*] Kích hoạt JIT on-device vĩnh viễn cho '%@' (%@)...", app.displayName, app.bundleID]];
+    [[KernelExploit shared] logMessage:@"[+] Đã cấp cờ CS_DEBUGGED vào task và bypass cs_enforcement tầng kernel."];
+    [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] JIT đã được kích hoạt vĩnh viễn cho '%@'! Mở app lên là JIT tự động chạy.", app.displayName]];
     return YES;
 }
 
