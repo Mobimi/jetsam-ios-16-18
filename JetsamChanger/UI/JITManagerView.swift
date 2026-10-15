@@ -258,12 +258,10 @@ struct JITManagerView: View {
 
                 // Activate Button
                 Button(action: {
-                    var err: NSString? = nil
-                    let ok = DylibInjector.shared().enablePermanentJIT(for: app, error: &err)
+                    let (ok, msg) = manager.enablePermanentJIT(for: app)
                     isSuccess = ok
-                    statusMessage = ok ? "Đã kích hoạt JIT vĩnh viễn cho \(app.displayName)! Bây giờ bạn có thể mở app lên và tận hưởng 60-120 FPS." : (err as String? ?? "Lỗi kích hoạt JIT.")
+                    statusMessage = ok ? "Đã kích hoạt JIT vĩnh viễn cho \(app.displayName)! Bây giờ bạn có thể mở app lên và tận hưởng 60-120 FPS." : msg
                     showResultBanner = true
-                    manager.refreshInstalledApps()
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "bolt.fill")

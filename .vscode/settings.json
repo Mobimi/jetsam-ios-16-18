@@ -1,0 +1,9 @@
+{
+  "C_Cpp.errorSquiggles": "disabled",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "swift.diagnostics.collection": false,
+  "files.associations": {
+    "*.h": "c",
+    "*.m": "objective-c"
+  }
+}

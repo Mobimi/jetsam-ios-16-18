@@ -22,19 +22,19 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<InstalledAppItem *> *)scanInstalledApplications;
 
 /// Inspects an app bundle to list currently injected dylibs
-- (NSArray<NSString *> *)getInjectedDylibsForApp:(InstalledAppItem *)app;
+- (NSArray<NSString *> *)getInjectedDylibsForApp:(InstalledAppItem *)app NS_SWIFT_NAME(getInjectedDylibs(for:));
 
 /// Injects a dylib into an application bundle without reinstalling
-- (BOOL)injectDylibAtURL:(NSURL *)dylibURL intoApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
+- (BOOL)injectDylibAtURL:(NSURL *)dylibURL intoApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError NS_SWIFT_NAME(injectDylib(at:into:error:));
 
 /// Removes an injected dylib or restores the original unpatched binary
-- (BOOL)ejectDylibNamed:(NSString *)dylibName fromApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
+- (BOOL)ejectDylibNamed:(NSString *)dylibName fromApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError NS_SWIFT_NAME(ejectDylib(named:from:error:));
 
 /// Restores the app binary to its pristine state (.orig backup)
-- (BOOL)restoreOriginalBinaryForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
+- (BOOL)restoreOriginalBinaryForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError NS_SWIFT_NAME(restoreOriginalBinary(for:error:));
 
 /// Enables permanent JIT on-device for an app
-- (BOOL)enablePermanentJITForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError;
+- (BOOL)enablePermanentJITForApp:(InstalledAppItem *)app error:(NSString * _Nullable * _Nullable)outError NS_SWIFT_NAME(enablePermanentJIT(for:error:));
 
 @end
 

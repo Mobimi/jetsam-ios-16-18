@@ -194,6 +194,13 @@ public class ToolboxManager: ObservableObject {
         return ok
     }
 
+    public func enablePermanentJIT(for app: InstalledAppItem) -> (Bool, String) {
+        var err: NSString? = nil
+        let ok = DylibInjector.shared().enablePermanentJIT(for: app, error: &err)
+        refreshInstalledApps()
+        return (ok, (err as String?) ?? (ok ? "Đã kích hoạt JIT vĩnh viễn!" : "Lỗi kích hoạt JIT."))
+    }
+
     // MARK: - LaunchDaemon Actions
     public func refreshDaemons() {
         self.daemons = DaemonManager.shared().getAllDaemons()

@@ -27,16 +27,16 @@ typedef NS_ENUM(NSInteger, DaemonStatus) {
 - (NSArray<DaemonItem *> *)getAllDaemons;
 
 /// Toggles a specific daemon's state (Running vs Disabled/Frozen)
-- (BOOL)toggleDaemon:(DaemonItem *)daemon enable:(BOOL)enable;
+- (BOOL)toggleDaemon:(DaemonItem *)daemon enable:(BOOL)enable NS_SWIFT_NAME(toggleDaemon(_:enable:));
 
 /// Freezes a running daemon with SIGSTOP
-- (BOOL)freezeDaemon:(DaemonItem *)daemon;
+- (BOOL)freezeDaemon:(DaemonItem *)daemon NS_SWIFT_NAME(freezeDaemon(_:));
 
 /// Resumes a frozen daemon with SIGCONT
-- (BOOL)resumeDaemon:(DaemonItem *)daemon;
+- (BOOL)resumeDaemon:(DaemonItem *)daemon NS_SWIFT_NAME(resumeDaemon(_:));
 
 /// One-tap extreme optimization: freezes/disables all telemetry & crash daemons
-- (int)oneTapOptimizeAllDaemons;
+- (int)oneTapOptimizeAllDaemons NS_SWIFT_NAME(oneTapOptimizeAllDaemons());
 
 @end
 
