@@ -348,7 +348,15 @@ struct DylibInjectorView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(pickedDylibURL == nil ? Theme.bgSecondary : Theme.gradientCyanPurple)
+                .background(
+                    Group {
+                        if pickedDylibURL == nil {
+                            Theme.bgSecondary
+                        } else {
+                            Theme.gradientCyanPurple
+                        }
+                    }
+                )
                 .foregroundColor(.white)
                 .cornerRadius(14)
             }
