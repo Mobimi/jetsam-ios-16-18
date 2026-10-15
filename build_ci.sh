@@ -47,6 +47,7 @@ clang -c -target arm64-apple-ios17.0 \
 echo "[*] Compiling Swift UI and Process sources..."
 swiftc -target arm64-apple-ios17.0 \
     -sdk "$SDK_PATH" \
+    -parse-as-library \
     -import-objc-header "JetsamChanger/JetsamChanger-Bridging-Header.h" \
     -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
