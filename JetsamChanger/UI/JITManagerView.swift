@@ -39,9 +39,27 @@ struct JITManagerView: View {
                         }
 
                         // Apps List
-                        LazyVStack(spacing: 12) {
-                            ForEach(manager.filteredInstalledApps, id: \.bundleID) { app in
-                                appRow(app)
+                        if manager.filteredInstalledApps.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "bolt.slash.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(Theme.textTertiary)
+                                Text("Chưa tìm thấy ứng dụng thật nào")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(Theme.textSecondary)
+                                Text("Vui lòng kích hoạt Kernel Exploit ở tab Console để thoát Sandbox và quét danh sách app thật đã cài trên iPhone của bạn.")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Theme.textTertiary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 30)
+                        } else {
+                            LazyVStack(spacing: 12) {
+                                ForEach(manager.filteredInstalledApps, id: \.bundleID) { app in
+                                    appRow(app)
+                                }
                             }
                         }
                     }

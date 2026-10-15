@@ -33,8 +33,65 @@
 
 - (NSArray<InstalledAppItem *> *)scanInstalledApplications {
     NSMutableArray<InstalledAppItem *> *apps = [NSMutableArray array];
+    NSMutableSet<NSString *> *seenBundleIDs = [NSMutableSet set];
     NSFileManager *fm = [NSFileManager defaultManager];
 
+    // Method 1: Query LaunchServices (LSApplicationWorkspace) - lists all real installed apps
+    Class lsClass = NSClassFromString(@"LSApplicationWorkspace");
+    if (lsClass) {
+        id workspace = [lsClass performSelector:NSSelectorFromString(@"defaultWorkspace")];
+        if (workspace && [workspace respondsToSelector:NSSelectorFromString(@"allInstalledApplications")]) {
+            NSArray *installed = [workspace performSelector:NSSelectorFromString(@"allInstalledApplications")];
+            for (id proxy in installed) {
+                @try {
+                    NSString *bundleID = [proxy valueForKey:@"applicationIdentifier"];
+                    if (!bundleID || [seenBundleIDs containsObject:bundleID]) continue;
+
+                    // Filter out internal non-launchable Apple hidden services
+                    if ([bundleID hasPrefix:@"com.apple.webapp"] || 
+                        [bundleID hasPrefix:@"com.apple.CoreAuthUI"] ||
+                        [bundleID hasPrefix:@"com.apple.InCallService"]) {
+                        continue;
+                    }
+
+                    NSString *name = [proxy valueForKey:@"localizedName"];
+                    NSURL *bundleURL = [proxy valueForKey:@"bundleURL"];
+                    if (!bundleURL || !bundleURL.path) continue;
+
+                    InstalledAppItem *app = [[InstalledAppItem alloc] init];
+                    app.bundleID = bundleID;
+                    app.displayName = (name && name.length > 0) ? name : bundleID;
+                    app.bundlePath = bundleURL.path;
+
+                    id type = [proxy valueForKey:@"applicationType"];
+                    app.isSystemApp = [type isKindOfClass:[NSString class]] && [type isEqualToString:@"System"];
+
+                    id version = [proxy valueForKey:@"shortVersionString"];
+                    app.versionString = [version isKindOfClass:[NSString class]] ? version : @"1.0";
+
+                    // Determine executable binary path
+                    id exec = [proxy valueForKey:@"bundleExecutable"];
+                    NSString *execName = [exec isKindOfClass:[NSString class]] ? exec : nil;
+                    if (!execName) {
+                        NSString *infoPlistPath = [app.bundlePath stringByAppendingPathComponent:@"Info.plist"];
+                        NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:infoPlistPath];
+                        execName = info[@"CFBundleExecutable"] ?: bundleURL.lastPathComponent.stringByDeletingPathExtension;
+                    }
+                    if (execName) {
+                        app.executablePath = [app.bundlePath stringByAppendingPathComponent:execName];
+                    }
+
+                    app.injectedDylibs = [self getInjectedDylibsForApp:app];
+                    [seenBundleIDs addObject:bundleID];
+                    [apps addObject:app];
+                } @catch (NSException *e) {
+                    // Ignore private API KVC read exceptions
+                }
+            }
+        }
+    }
+
+    // Method 2: Scan /var/containers/Bundle/Application (accessible when Unsandboxed/Root)
     NSString *bundleContainer = @"/var/containers/Bundle/Application";
     BOOL isDir = NO;
     if ([fm fileExistsAtPath:bundleContainer isDirectory:&isDir] && isDir) {
@@ -50,15 +107,19 @@
                         NSString *infoPlistPath = [appPath stringByAppendingPathComponent:@"Info.plist"];
                         NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:infoPlistPath];
                         if (info) {
+                            NSString *bundleID = info[@"CFBundleIdentifier"] ?: @"unknown.bundle.id";
+                            if ([seenBundleIDs containsObject:bundleID]) continue;
+
                             InstalledAppItem *app = [[InstalledAppItem alloc] init];
                             app.bundlePath = appPath;
                             app.displayName = info[@"CFBundleDisplayName"] ?: info[@"CFBundleName"] ?: item.stringByDeletingPathExtension;
-                            app.bundleID = info[@"CFBundleIdentifier"] ?: @"unknown.bundle.id";
+                            app.bundleID = bundleID;
                             app.versionString = info[@"CFBundleShortVersionString"] ?: @"1.0";
                             NSString *execName = info[@"CFBundleExecutable"] ?: item.stringByDeletingPathExtension;
                             app.executablePath = [appPath stringByAppendingPathComponent:execName];
                             app.isSystemApp = NO;
                             app.injectedDylibs = [self getInjectedDylibsForApp:app];
+                            [seenBundleIDs addObject:bundleID];
                             [apps addObject:app];
                         }
                     }
@@ -67,32 +128,7 @@
         }
     }
 
-    // Fallback: Populate well-known apps for user convenience if sandbox or first run
-    if (apps.count == 0) {
-        NSArray<NSDictionary *> *defaults = @[
-            @{@"name": @"PojavLauncher / Amethyst", @"id": @"net.kdt.pojavlauncher", @"exec": @"PojavLauncher"},
-            @{@"name": @"Dolphin iOS Emulator", @"id": @"oat.me.dolphin-ios", @"exec": @"Dolphin"},
-            @{@"name": @"PPSSPP PlayStation Portable", @"id": @"org.ppsspp.ppsspp", @"exec": @"PPSSPP"},
-            @{@"name": @"UTM Virtual Machines", @"id": @"com.utmapp.UTM", @"exec": @"UTM"},
-            @{@"name": @"Flycast Dreamcast Emulator", @"id": @"com.flyinghead.Flycast", @"exec": @"Flycast"},
-            @{@"name": @"Minecraft PE", @"id": @"com.mojang.minecraftpe", @"exec": @"minecraftpe"},
-            @{@"name": @"TikTok", @"id": @"com.zhiliaoapp.musically", @"exec": @"TikTok"},
-            @{@"name": @"Facebook", @"id": @"com.facebook.Facebook", @"exec": @"Facebook"}
-        ];
-
-        for (NSDictionary *d in defaults) {
-            InstalledAppItem *app = [[InstalledAppItem alloc] init];
-            app.displayName = d[@"name"];
-            app.bundleID = d[@"id"];
-            app.bundlePath = [NSString stringWithFormat:@"/var/containers/Bundle/Application/DEMO/%@.app", d[@"exec"]];
-            app.executablePath = [app.bundlePath stringByAppendingPathComponent:d[@"exec"]];
-            app.versionString = @"Latest";
-            app.isSystemApp = NO;
-            app.injectedDylibs = @[];
-            [apps addObject:app];
-        }
-    }
-
+    // Sort alphabetically by display name
     [apps sortUsingComparator:^NSComparisonResult(InstalledAppItem *a, InstalledAppItem *b) {
         return [a.displayName localizedCaseInsensitiveCompare:b.displayName];
     }];
@@ -275,16 +311,6 @@ static BOOL patchMachOBinary(NSString *binaryPath, NSString *dylibLoadPath, NSSt
         [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] Successfully injected '%@' into '%@' without reinstalling!", dylibFileName, app.displayName]];
         return YES;
     } else {
-        // Fallback for simulation / mock UI display if executable path is demo
-        if ([app.bundlePath containsString:@"DEMO"]) {
-            NSMutableArray *arr = [app.injectedDylibs mutableCopy] ?: [NSMutableArray array];
-            if (![arr containsObject:dylibFileName]) {
-                [arr addObject:dylibFileName];
-            }
-            app.injectedDylibs = [arr copy];
-            [[KernelExploit shared] logMessage:[NSString stringWithFormat:@"[✓] [Mock Mode] Injected '%@' into target bundle successfully!", dylibFileName]];
-            return YES;
-        }
         if (outError) *outError = patchErr ?: @"Unknown Mach-O patching error.";
         [[KernelExploit shared] logError:[NSString stringWithFormat:@"[X] Injection failed: %@", patchErr]];
         return NO;
