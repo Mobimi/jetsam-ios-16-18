@@ -2,8 +2,48 @@
 #import "KernelMemory.h"
 #import "KernelExploit.h"
 #import <sys/sysctl.h>
-#import <libproc.h>
 #import <mach/mach.h>
+#import <dlfcn.h>
+#import <unistd.h>
+
+static inline int j_memorystatus_control(uint32_t command, int32_t pid, uint32_t flags, void *buffer, size_t buffersize) {
+    typedef int (*memorystatus_control_fn)(uint32_t, int32_t, uint32_t, void*, size_t);
+    static memorystatus_control_fn fn = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        fn = (memorystatus_control_fn)dlsym(RTLD_DEFAULT, "memorystatus_control");
+    });
+    if (fn) {
+        return fn(command, pid, flags, buffer, buffersize);
+    }
+    return (int)syscall(440, command, pid, flags, buffer, buffersize);
+}
+
+static inline int j_proc_name(int pid, void *buffer, uint32_t buffersize) {
+    typedef int (*proc_name_fn)(int, void*, uint32_t);
+    static proc_name_fn fn = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        fn = (proc_name_fn)dlsym(RTLD_DEFAULT, "proc_name");
+    });
+    if (fn) {
+        return fn(pid, buffer, buffersize);
+    }
+    return -1;
+}
+
+static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer, int buffersize) {
+    typedef int (*proc_pidinfo_fn)(int, int, uint64_t, void*, int);
+    static proc_pidinfo_fn fn = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        fn = (proc_pidinfo_fn)dlsym(RTLD_DEFAULT, "proc_pidinfo");
+    });
+    if (fn) {
+        return fn(pid, flavor, arg, buffer, buffersize);
+    }
+    return -1;
+}
 
 @implementation JetsamProcessModel
 
@@ -68,7 +108,7 @@
             if (pid <= 0) continue;
 
             char nameBuf[256] = {0};
-            proc_name(pid, nameBuf, sizeof(nameBuf));
+            j_proc_name(pid, nameBuf, sizeof(nameBuf));
             if (strlen(nameBuf) == 0) {
                 strlcpy(nameBuf, procs[i].kp_proc.p_comm, sizeof(nameBuf));
             }
@@ -80,7 +120,7 @@
 
             // Memory footprint via proc_pidinfo
             struct proc_taskinfo pti;
-            if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti)) == sizeof(pti)) {
+            if (j_proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &pti, sizeof(pti)) == sizeof(pti)) {
                 model.footprintBytes = pti.pti_resident_size;
             }
 
@@ -197,7 +237,7 @@
     }
 
     // Call memorystatus_control syscall
-    int ret = memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK, pid, (uint32_t)limitMB, NULL, 0);
+    int ret = j_memorystatus_control(MEMORYSTATUS_CMD_SET_JETSAM_HIGH_WATER_MARK, pid, (uint32_t)limitMB, NULL, 0);
     if (ret == 0) {
         [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[+] memorystatus_control syscall succeeded for PID %d.", pid]];
         success = YES;
@@ -232,12 +272,12 @@
     memorystatus_priority_properties_t props;
     props.priority = priority;
     props.user_data = 0;
-    int ret = memorystatus_control(MEMORYSTATUS_CMD_SET_PRIORITY_PROPERTIES, pid, 0, &props, sizeof(props));
+    int ret = j_memorystatus_control(MEMORYSTATUS_CMD_SET_PRIORITY_PROPERTIES, pid, 0, &props, sizeof(props));
     return (ret == 0);
 }
 
 - (BOOL)setFreezable:(BOOL)isFreezable forPID:(pid_t)pid error:(NSError **)error {
-    int ret = memorystatus_control(MEMORYSTATUS_CMD_SET_PROCESS_IS_FREEZABLE, pid, isFreezable ? 1 : 0, NULL, 0);
+    int ret = j_memorystatus_control(MEMORYSTATUS_CMD_SET_PROCESS_IS_FREEZABLE, pid, isFreezable ? 1 : 0, NULL, 0);
     return (ret == 0);
 }
 

@@ -406,7 +406,8 @@ struct ProcessDetailView: View {
 
             if success {
                 isApplySuccess = true
-                notificationMessage = "Đã chỉnh thành công Jetsam limit cho \(process.name) lên \(limit) MB (~String(format: \"%.1f\", Double(limit)/1024.0) GB) với Priority \(selectedPriority)!"
+                let gbString = String(format: "%.1f", Double(limit) / 1024.0)
+                notificationMessage = "Đã chỉnh thành công Jetsam limit cho \(process.name) lên \(limit) MB (~\(gbString) GB) với Priority \(selectedPriority)!"
             } else {
                 isApplySuccess = false
                 notificationMessage = "Lỗi khi ghi thông số Jetsam vào kernel proc_t cho PID \(process.pid). Vui lòng vào tab Cài Đặt kiểm tra log lỗi."

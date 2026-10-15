@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import Darwin
 
 public struct ConsoleLogItem: Identifiable {
     public let id = UUID()
@@ -116,7 +117,7 @@ public class ProcessManager: ObservableObject {
         }
 
         if kr == KERN_SUCCESS {
-            let pageSize = UInt64(vm_kernel_page_size)
+            let pageSize = UInt64(vm_page_size)
             let free = UInt64(stats.free_count) * pageSize
             let inactive = UInt64(stats.inactive_count) * pageSize
             let active = UInt64(stats.active_count) * pageSize

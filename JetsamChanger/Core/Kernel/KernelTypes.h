@@ -103,6 +103,28 @@ typedef struct memorystatus_memlimit_properties {
     uint32_t memlimit_inactive_attr;
 } memorystatus_memlimit_properties_t;
 
-int memorystatus_control(uint32_t command, int32_t pid, uint32_t flags, void *buffer, size_t buffersize);
+#ifndef PROC_PIDTASKINFO
+#define PROC_PIDTASKINFO 4
+struct proc_taskinfo {
+    uint64_t                pti_virtual_size;
+    uint64_t                pti_resident_size;
+    uint64_t                pti_total_user;
+    uint64_t                pti_total_system;
+    uint64_t                pti_threads_user;
+    uint64_t                pti_threads_system;
+    int32_t                 pti_policy;
+    int32_t                 pti_faults;
+    int32_t                 pti_pageins;
+    int32_t                 pti_cow_faults;
+    int32_t                 pti_messages_sent;
+    int32_t                 pti_messages_received;
+    int32_t                 pti_syscalls_mach;
+    int32_t                 pti_syscalls_unix;
+    int32_t                 pti_csw;
+    int32_t                 pti_threadnum;
+    int32_t                 pti_numrunning;
+    int32_t                 pti_priority;
+};
+#endif
 
 #endif /* KernelTypes_h */

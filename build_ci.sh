@@ -25,18 +25,21 @@ echo "[*] Compiling C/Obj-C kernel sources..."
 clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
+    -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     "JetsamChanger/Core/Kernel/KernelMemory.c" -o "$OUTPUT_DIR/KernelMemory.o"
 
 clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
+    -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     "JetsamChanger/Core/Kernel/KernelExploit.m" -o "$OUTPUT_DIR/KernelExploit.o"
 
 clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
+    -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     "JetsamChanger/Core/Kernel/JetsamModifier.m" -o "$OUTPUT_DIR/JetsamModifier.o"
 
@@ -45,11 +48,11 @@ echo "[*] Compiling Swift UI and Process sources..."
 swiftc -target arm64-apple-ios17.0 \
     -sdk "$SDK_PATH" \
     -import-objc-header "JetsamChanger/JetsamChanger-Bridging-Header.h" \
+    -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     -framework UIKit \
     -framework SwiftUI \
     -framework Security \
-    -lproc \
     "$OUTPUT_DIR/KernelMemory.o" \
     "$OUTPUT_DIR/KernelExploit.o" \
     "$OUTPUT_DIR/JetsamModifier.o" \

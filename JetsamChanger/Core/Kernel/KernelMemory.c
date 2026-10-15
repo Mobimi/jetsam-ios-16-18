@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static uint64_t g_kernel_base = 0;
 static uint64_t g_kernel_slide = 0;
@@ -84,7 +85,7 @@ bool kwrite32(uint64_t kaddr, uint32_t val) {
 }
 
 bool kwrite16(uint64_t kaddr, uint16_t val) {
-    uint32_t aligned = (uint32_t)(kaddr & ~3ULL);
+    uint64_t aligned = kaddr & ~3ULL;
     uint32_t current = kread32(aligned);
     uint32_t mask = 0xFFFF;
     uint32_t shift = (kaddr & 2) ? 16 : 0;
@@ -93,7 +94,7 @@ bool kwrite16(uint64_t kaddr, uint16_t val) {
 }
 
 bool kwrite8(uint64_t kaddr, uint8_t val) {
-    uint32_t aligned = (uint32_t)(kaddr & ~3ULL);
+    uint64_t aligned = kaddr & ~3ULL;
     uint32_t current = kread32(aligned);
     uint32_t mask = 0xFF;
     uint32_t shift = (kaddr & 3) * 8;
