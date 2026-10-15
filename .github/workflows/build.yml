@@ -74,6 +74,17 @@ jobs:
           ls -la build_output 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Push Build Debug Branch
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B ci-debug
+          find . -maxdepth 3 -ls > file_tree.txt
+          git add -f build_debug.log file_tree.txt build_output 2>/dev/null || true
+          git commit -m "ci: debug log and artifacts" || true
+          git push -f origin ci-debug || true
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
