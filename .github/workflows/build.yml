@@ -62,13 +62,26 @@ jobs:
           name: build-debug-log
           path: build_debug.log
 
+      - name: Verify Build Output & Populate Summary
+        if: always()
+        run: |
+          echo "## 📋 Build Log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat build_debug.log 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "## 📂 Files in build_output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -la build_output 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: JetsamChanger-Release
           path: |
-            build_output/*.ipa
-            build_output/*.tipa
+            build_output/JetsamChanger.ipa
+            build_output/JetsamChanger.tipa
+          if-no-files-found: error
           retention-days: 30
 
       - name: Create GitHub Release
@@ -77,6 +90,7 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: "Jetsam Changer v1.0 (Build ${{ github.run_number }})"
+          fail_on_unmatched_files: false
           body: |
             ## 🚀 Jetsam Changer (iOS 17.x – 18.x)
             
