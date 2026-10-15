@@ -23,17 +23,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JetsamModifier : NSObject
 
++ (instancetype)shared;
 + (instancetype)sharedModifier;
 
 - (NSArray<JetsamProcessModel *> *)getAllRunningProcesses;
 - (nullable JetsamProcessModel *)getJetsamInfoForPID:(pid_t)pid;
 
-- (BOOL)setJetsamLimit:(int32_t)limitMB forPID:(pid_t)pid error:(NSError **)error;
-- (BOOL)setPriority:(int16_t)priority forPID:(pid_t)pid error:(NSError **)error;
-- (BOOL)setFreezable:(BOOL)isFreezable forPID:(pid_t)pid error:(NSError **)error;
-- (BOOL)setUnlimitedMemoryForPID:(pid_t)pid error:(NSError **)error;
+- (BOOL)setJetsamLimit:(int32_t)limitMB forPID:(pid_t)pid;
+- (BOOL)setPriority:(int16_t)priority forPID:(pid_t)pid;
+- (BOOL)setFreezable:(BOOL)isFreezable forPID:(pid_t)pid;
+- (BOOL)setUnlimitedMemoryForPID:(pid_t)pid;
 
-- (BOOL)applyJetsamPreset:(NSString *)presetName forPID:(pid_t)pid error:(NSError **)error;
+- (BOOL)applyJetsamPreset:(NSString *)presetName forPID:(pid_t)pid;
 
 @end
 

@@ -145,8 +145,7 @@ public class ProcessManager: ObservableObject {
         exploitStatusText = "Đang chạy kernel exploit..."
 
         DispatchQueue.global(qos: .userInitiated).async {
-            var error: NSError?
-            let success = KernelExploit.shared().runAutomaticExploit(&error)
+            let success = KernelExploit.shared().runAutomaticExploit()
 
             Task { @MainActor in
                 self.isExploiting = false
@@ -198,36 +197,31 @@ public class ProcessManager: ObservableObject {
     }
 
     public func setJetsamLimit(pid: pid_t, limitMB: Int32) -> Bool {
-        var err: NSError?
-        let ok = JetsamModifier.shared().setJetsamLimit(limitMB, forPID: pid, error: &err)
+        let ok = JetsamModifier.shared().setJetsamLimit(limitMB, forPID: pid)
         if ok { refreshProcesses() }
         return ok
     }
 
     public func setUnlimited(pid: pid_t) -> Bool {
-        var err: NSError?
-        let ok = JetsamModifier.shared().setUnlimitedMemory(forPID: pid, error: &err)
+        let ok = JetsamModifier.shared().setUnlimitedMemory(forPID: pid)
         if ok { refreshProcesses() }
         return ok
     }
 
     public func setPriority(pid: pid_t, priority: Int16) -> Bool {
-        var err: NSError?
-        let ok = JetsamModifier.shared().setPriority(priority, forPID: pid, error: &err)
+        let ok = JetsamModifier.shared().setPriority(priority, forPID: pid)
         if ok { refreshProcesses() }
         return ok
     }
 
     public func setFreezable(pid: pid_t, isFreezable: Bool) -> Bool {
-        var err: NSError?
-        let ok = JetsamModifier.shared().setFreezable(isFreezable, forPID: pid, error: &err)
+        let ok = JetsamModifier.shared().setFreezable(isFreezable, forPID: pid)
         if ok { refreshProcesses() }
         return ok
     }
 
     public func applyPreset(pid: pid_t, presetName: String) -> Bool {
-        var err: NSError?
-        let ok = JetsamModifier.shared().applyJetsamPreset(presetName, forPID: pid, error: &err)
+        let ok = JetsamModifier.shared().applyJetsamPreset(presetName, forPID: pid)
         if ok { refreshProcesses() }
         return ok
     }

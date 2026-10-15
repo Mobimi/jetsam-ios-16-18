@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -ex
 
 APP_NAME="JetsamChanger"
 OUTPUT_DIR="./build"
@@ -23,21 +23,21 @@ printf "APPL????" > "$APP_DIR/PkgInfo"
 
 # Compile C / Objective-C sources
 echo "[*] Compiling C/Obj-C kernel sources..."
-clang -c -target arm64-apple-ios17.0 \
+xcrun --sdk iphoneos clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
     -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     "JetsamChanger/Core/Kernel/KernelMemory.c" -o "$OUTPUT_DIR/KernelMemory.o"
 
-clang -c -target arm64-apple-ios17.0 \
+xcrun --sdk iphoneos clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
     -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
     "JetsamChanger/Core/Kernel/KernelExploit.m" -o "$OUTPUT_DIR/KernelExploit.o"
 
-clang -c -target arm64-apple-ios17.0 \
+xcrun --sdk iphoneos clang -c -target arm64-apple-ios17.0 \
     -isysroot "$SDK_PATH" \
     -fobjc-arc \
     -I"JetsamChanger" \
@@ -46,15 +46,17 @@ clang -c -target arm64-apple-ios17.0 \
 
 # Compile Swift sources with Bridging Header and Link
 echo "[*] Compiling Swift UI and Process sources..."
-swiftc -target arm64-apple-ios17.0 \
+xcrun --sdk iphoneos swiftc -target arm64-apple-ios17.0 \
     -sdk "$SDK_PATH" \
     -parse-as-library \
     -import-objc-header "JetsamChanger/JetsamChanger-Bridging-Header.h" \
     -I"JetsamChanger" \
     -I"JetsamChanger/Core/Kernel" \
+    -framework Foundation \
     -framework UIKit \
     -framework SwiftUI \
     -framework Security \
+    -framework CoreGraphics \
     "$OUTPUT_DIR/KernelMemory.o" \
     "$OUTPUT_DIR/KernelExploit.o" \
     "$OUTPUT_DIR/JetsamModifier.o" \

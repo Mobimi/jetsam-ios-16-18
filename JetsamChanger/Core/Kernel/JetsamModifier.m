@@ -80,6 +80,10 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
 
 @implementation JetsamModifier
 
++ (instancetype)shared {
+    return [self sharedModifier];
+}
+
 + (instancetype)sharedModifier {
     static JetsamModifier *instance = nil;
     static dispatch_once_t onceToken;
@@ -201,7 +205,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     return nil;
 }
 
-- (BOOL)setJetsamLimit:(int32_t)limitMB forPID:(pid_t)pid error:(NSError **)error {
+- (BOOL)setJetsamLimit:(int32_t)limitMB forPID:(pid_t)pid {
     [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[*] Modifying Jetsam limit for PID %d to %d MB...", pid, limitMB]];
 
     BOOL success = NO;
@@ -248,7 +252,7 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     return success;
 }
 
-- (BOOL)setPriority:(int16_t)priority forPID:(pid_t)pid error:(NSError **)error {
+- (BOOL)setPriority:(int16_t)priority forPID:(pid_t)pid {
     [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[*] Adjusting priority for PID %d to %d...", pid, priority]];
 
     proc_offsets_t *offsets = get_calibrated_offsets();
@@ -276,35 +280,35 @@ static inline int j_proc_pidinfo(int pid, int flavor, uint64_t arg, void *buffer
     return (ret == 0);
 }
 
-- (BOOL)setFreezable:(BOOL)isFreezable forPID:(pid_t)pid error:(NSError **)error {
+- (BOOL)setFreezable:(BOOL)isFreezable forPID:(pid_t)pid {
     int ret = j_memorystatus_control(MEMORYSTATUS_CMD_SET_PROCESS_IS_FREEZABLE, pid, isFreezable ? 1 : 0, NULL, 0);
     return (ret == 0);
 }
 
-- (BOOL)setUnlimitedMemoryForPID:(pid_t)pid error:(NSError **)error {
+- (BOOL)setUnlimitedMemoryForPID:(pid_t)pid {
     [[KernelExploit sharedExploit] logMessage:[NSString stringWithFormat:@"[!] Setting UNLIMITED Jetsam budget (-1) for PID %d...", pid]];
     // Limit of -1 means no limit enforced by Darwin
-    BOOL res1 = [self setJetsamLimit:-1 forPID:pid error:error];
-    BOOL res2 = [self setPriority:JETSAM_PRIORITY_CRITICAL forPID:pid error:error];
+    BOOL res1 = [self setJetsamLimit:-1 forPID:pid];
+    BOOL res2 = [self setPriority:JETSAM_PRIORITY_CRITICAL forPID:pid];
     return res1 || res2;
 }
 
-- (BOOL)applyJetsamPreset:(NSString *)presetName forPID:(pid_t)pid error:(NSError **)error {
+- (BOOL)applyJetsamPreset:(NSString *)presetName forPID:(pid_t)pid {
     if ([presetName isEqualToString:@"Minecraft / Amethyst"]) {
         // Amethyst / PojavLauncher optimal 6GB allocation with Foreground Key priority
-        [self setJetsamLimit:6144 forPID:pid error:error];
-        [self setPriority:JETSAM_PRIORITY_FOREGROUND_KEY forPID:pid error:error];
+        [self setJetsamLimit:6144 forPID:pid];
+        [self setPriority:JETSAM_PRIORITY_FOREGROUND_KEY forPID:pid];
         return YES;
     } else if ([presetName isEqualToString:@"Emulators (Dolphin / UTM)"]) {
         // 4GB allocation for heavy JIT emulators
-        [self setJetsamLimit:4096 forPID:pid error:error];
-        [self setPriority:JETSAM_PRIORITY_FOREGROUND forPID:pid error:error];
+        [self setJetsamLimit:4096 forPID:pid];
+        [self setPriority:JETSAM_PRIORITY_FOREGROUND forPID:pid];
         return YES;
     } else if ([presetName isEqualToString:@"Unlimited (No Jetsam Kill)"]) {
-        return [self setUnlimitedMemoryForPID:pid error:error];
+        return [self setUnlimitedMemoryForPID:pid];
     } else if ([presetName isEqualToString:@"System Default"]) {
-        [self setJetsamLimit:2048 forPID:pid error:error];
-        [self setPriority:JETSAM_PRIORITY_FOREGROUND forPID:pid error:error];
+        [self setJetsamLimit:2048 forPID:pid];
+        [self setPriority:JETSAM_PRIORITY_FOREGROUND forPID:pid];
         return YES;
     }
     return NO;

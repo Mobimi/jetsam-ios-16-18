@@ -28,7 +28,11 @@ jobs:
           echo "Available Xcode installations:"
           ls -d /Applications/Xcode* 2>/dev/null || true
           for xcode_path in /Applications/Xcode_16*.app /Applications/Xcode_15*.app; do
-            if [ -d "$xcode_path" ]; then
+            if [ -d "$xcode_path/Contents/Developer" ]; then
+              echo "Selecting $xcode_path/Contents/Developer"
+              sudo xcode-select -s "$xcode_path/Contents/Developer"
+              break
+            elif [ -d "$xcode_path" ]; then
               echo "Selecting $xcode_path"
               sudo xcode-select -s "$xcode_path"
               break
