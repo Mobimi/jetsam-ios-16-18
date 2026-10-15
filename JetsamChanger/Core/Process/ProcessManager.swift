@@ -203,7 +203,7 @@ public class ProcessManager: ObservableObject {
     }
 
     public func setUnlimited(pid: pid_t) -> Bool {
-        let ok = JetsamModifier.shared().setUnlimitedMemory(forPID: pid)
+        let ok = JetsamModifier.shared().setUnlimitedMemoryForPID(pid)
         if ok { refreshProcesses() }
         return ok
     }

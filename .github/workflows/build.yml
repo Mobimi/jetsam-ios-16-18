@@ -46,6 +46,7 @@ jobs:
 
       - name: Build Application
         run: |
+          set -o pipefail
           chmod +x ./build_ci.sh
           ./build_ci.sh 2>&1 | tee build_debug.log || {
             echo "## ❌ Build Failure Details" >> $GITHUB_STEP_SUMMARY
